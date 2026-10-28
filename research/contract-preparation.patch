@@ -1,0 +1,15 @@
+--- a/README.md
++++ b/README.md
+@@ -37,6 +37,12 @@
+ The v0.2 ledger conservatively invalidates all receipts when any candidate source changes, rather than guessing affected scope. Repeat required goal/code checks for the new candidate and update capability observations; unchanged candidates can be reassessed without rerunning tools. Runtime inability must be recorded as unavailable, never hidden by a historical observation. Final acceptance requires both a valid ledger and a genuinely independent operational verdict; JSON identity strings do not authenticate agents.
+ 
+ Deliver only checked, independently accepted work, following project publication authorization. Report scope, evidence, exclusions, limitations and revision. Never force-publish or commit incomplete work to satisfy cadence. Routine screenshots/logs/transcripts go into ignored scratch space; Git preserves completed history. Keep current requirements and open defects discoverable, not a permanent report per task.
++
++## Experimental executable contract preparation
++
++During criteria preparation, when project capabilities support inexpensive executable checks, the lead writes a small project-specific contract suite before implementing the behavior. Choose observable valid and invalid outcomes from the frozen requirements. Run the suite against the initial project and retain the actual result; an unavailable implementation proves only that the implementation is absent, not that the assertions are adequate or that a product regressed. The independent reviewer challenges the cases and their expected outcomes during the existing design challenge before implementation.
++
++Freeze the reviewed contract bytes. Implement the requested behavior and rerun those same checks. Record the before/after observations and suite identity. Any necessary contract amendment needs a reasoned criteria amendment and fresh independent criticism; a failed implementation does not justify weakening assertions. Preserve all ordinary independent behavioral verification, exact-source review, evidence freshness and acceptance requirements. This experimental preparation step changes no stage ownership or acceptance gate and claims no measured efficiency benefit without a controlled trial.
+ 
+ ## Project artifact policy
+ 

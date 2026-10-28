@@ -1,0 +1,82 @@
+{
+  "kind": "sanitized-pilot-evidence",
+  "experiment": "exp-335d299b3d9f",
+  "outcome": "No demonstrated advantage",
+  "hypothesis": "Executable contracts frozen before implementation may reduce corrections while preserving all quality requirements.",
+  "stable_revision": "f65d8bd1cae4f19ee90336097dacf6eb33b4b512",
+  "candidate_digest": "1d793c455ae173cbd6b12650d383339313819bffdf1f17c789f60705a5d9b373",
+  "patch_digest": "4a32f1d601192d00412f4c5ce9e798984950c2d123c4c35adb21dc112885ba09",
+  "benchmark": "repair-queue-v1",
+  "benchmark_revision": "d713cb5e7dd1c30dec30e9499f3421bcfaabe54e1238e705952618c5792f8152",
+  "criteria_digest": "a8f2876655c9c2b16b05611c3d76f33534e56522708232452c7db82f28f93021",
+  "evaluator_version": "61683fe52f6394966f2c1df740795f70a5da7713ac7dcf8561fb066d84c688d9",
+  "declared_model": "gpt-6.1-sol",
+  "actual_browser_versions": {
+    "stable": "156.0.8078.48",
+    "candidate": "156.0.8078.48"
+  },
+  "runs": {
+    "stable": {
+      "artifact_digest": "5dcb1e0071ca2cd60b58cac27477ab5615328718a0452df7b737e2e6f2f2068c",
+      "mandatory_criteria": {
+        "api_crud": "PASS",
+        "validation": "PASS",
+        "search_filter": "PASS",
+        "persistence": "PASS",
+        "ui_crud": "PASS",
+        "ui_filter": "PASS",
+        "ui_error": "PASS",
+        "responsive": "PASS",
+        "ui_states": "PASS",
+        "ui_validation": "PASS"
+      },
+      "independent_design_review": "PASS",
+      "independent_behavior_review": "PASS",
+      "independent_code_review": "PASS",
+      "correction_attempts": 1,
+      "evaluation_wall_seconds_excluding_preflight": 7.971407199999987
+    },
+    "candidate": {
+      "artifact_digest": "daf1d01a0483e115c97051e73f5ebc30bf735fa692e8a808772a9592028596f3",
+      "mandatory_criteria": {
+        "api_crud": "PASS",
+        "validation": "PASS",
+        "search_filter": "PASS",
+        "persistence": "PASS",
+        "ui_crud": "PASS",
+        "ui_filter": "PASS",
+        "ui_error": "PASS",
+        "responsive": "PASS",
+        "ui_states": "PASS",
+        "ui_validation": "PASS"
+      },
+      "independent_design_review": "PASS",
+      "independent_behavior_review": "PASS",
+      "independent_code_review": "PASS",
+      "correction_attempts": 0,
+      "evaluation_wall_seconds_excluding_preflight": 5.047986600000058
+    }
+  },
+  "candidate_intervention": {
+    "suite_sha256": "9482a36aec7cfaae5553f382c4310baae937f65ed7cde1962107fe1aa26c3271",
+    "before_implementation_exit": 1,
+    "after_implementation_exit": 0,
+    "unchanged_suite_tests": 6
+  },
+  "provider_usage": {
+    "input_tokens": null,
+    "output_tokens": null,
+    "model_calls": null,
+    "agent_sessions": null,
+    "monetary_cost": null
+  },
+  "limitations": [
+    "One stable-first pair, shared lead context and public known tests allow carryover.",
+    "The work continued across an interruption; active development duration was not reliably captured.",
+    "Deterministic evaluation timings are not development time or model efficiency.",
+    "Unsigned local provenance must be checked against actual independent chat/tool observations.",
+    "Only Windows native execution is verified on this host; other native platform adapters remain unverified."
+  ],
+  "retention": "Raw artifacts, receipts and screenshots remain in protected/ignored local .lab history; this file contains no transcript or credentials.",
+  "recommendation": "Retain evidence, refine or repeat under matched conditions. Production ADA promotion requires separate review."
+}

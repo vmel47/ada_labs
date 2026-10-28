@@ -1,0 +1,4 @@
+# Frozen source/benchmark identities use exact bytes on every platform.
+* -text whitespace=cr-at-eol,-blank-at-eof
+# A unified patch uses a single space to represent an empty context line.
+*.patch whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof

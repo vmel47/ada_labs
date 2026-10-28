@@ -1,0 +1,21 @@
+{
+  "id": "repair-queue-v1",
+  "version": 1,
+  "task": "task.md",
+  "starter": "starter",
+  "reference": "reference",
+  "evaluator": "repair_queue_v1",
+  "tools": ["python>=3.11", "sqlite3", "browser"],
+  "criteria": [
+    {"id": "api_crud", "description": "Create, read, edit, and reject unknown records through HTTP"},
+    {"id": "validation", "description": "Server rejects invalid values and malformed JSON without mutation"},
+    {"id": "search_filter", "description": "Case-insensitive search and status/priority filters intersect"},
+    {"id": "persistence", "description": "Records and edits survive a full server restart"},
+    {"id": "ui_crud", "description": "Browser creates and edits records, matching server state"},
+    {"id": "ui_filter", "description": "Browser search and filters update displayed records"},
+    {"id": "ui_error", "description": "Failed save shows an error and retains form input"},
+    {"id": "responsive", "description": "Usable labeled controls at 390px and no horizontal overflow"},
+    {"id": "ui_states", "description": "Visible loading, empty and list-load error states"},
+    {"id": "ui_validation", "description": "Invalid browser submission is rejected without losing inputs or mutating records"}
+  ]
+}

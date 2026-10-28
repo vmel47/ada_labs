@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Repair Queue</title>
+<style>
+*{box-sizing:border-box}body{font:16px system-ui;margin:0;background:#f3f5f8;color:#1c2634}main{max-width:1100px;margin:auto;padding:24px}h1{margin-bottom:6px}.muted{color:#526174}.layout{display:grid;grid-template-columns:300px 1fr;gap:24px;margin-top:26px}section,form{background:white;border:1px solid #dbe1e8;border-radius:12px;padding:20px;min-width:0}label{display:block;margin-bottom:14px;font-weight:600}input,select,textarea,button{font:inherit;max-width:100%;width:100%;padding:10px;border:1px solid #acb8c8;border-radius:6px;margin-top:5px}button{cursor:pointer;background:#234bc8;color:white}article{padding:16px 0;border-bottom:1px solid #ddd;overflow-wrap:anywhere}article button{width:auto}.filters{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}.error{color:#a11924}textarea{min-height:90px}@media(max-width:700px){main{padding:16px}.layout,.filters{grid-template-columns:1fr}}
+</style>
+<main><h1>Repair Queue</h1><p class="muted">Track each repair from arrival to completion.</p><div class="layout">
+<form id="form"><h2 id="heading">New repair</h2>
+<label>Customer<input data-testid="customer" name="customer" required maxlength="80"></label>
+<label>Device<input data-testid="device" name="device" required maxlength="120"></label>
+<label>Issue<textarea data-testid="issue" name="issue" required maxlength="500"></textarea></label>
+<label>Status<select data-testid="status" name="status"><option value="new">new</option><option value="in_progress">in_progress</option><option value="done">done</option></select></label>
+<label>Priority<select data-testid="priority" name="priority"><option value="normal">normal</option><option value="low">low</option><option value="high">high</option></select></label>
+<p data-testid="error" role="alert" class="error" hidden></p><button data-testid="save">Save repair</button><button type="button" id="cancel" hidden>Cancel edit</button></form>
+<section><h2>Repairs</h2><div class="filters">
+<label>Search<input data-testid="search" id="search" type="search"></label>
+<label>Status<select data-testid="status-filter" id="sf"><option value="">All</option><option>new</option><option>in_progress</option><option>done</option></select></label>
+<label>Priority<select data-testid="priority-filter" id="pf"><option value="">All</option><option>low</option><option>normal</option><option>high</option></select></label>
+</div><p id="notice" data-testid="list-state" data-state="ready" role="status"></p><div id="rows"></div></section></div></main>
+<script>
+const form=document.querySelector('#form'), error=document.querySelector('[data-testid=error]'), rows=document.querySelector('#rows'), notice=document.querySelector('#notice');
+let editing=null, sequence=0;
+const fields=['customer','device','issue','status','priority'];
+function reset(){editing=null;form.reset();document.querySelector('#heading').textContent='New repair';document.querySelector('#cancel').hidden=true;error.hidden=true;}
+async function load(){const seq=++sequence;notice.textContent='Loading…';notice.dataset.state='loading';try{const q=new URLSearchParams({q:document.querySelector('#search').value,status:document.querySelector('#sf').value,priority:document.querySelector('#pf').value});const response=await fetch('/api/repairs?'+q);if(!response.ok)throw Error('Unable to load repairs');const records=await response.json();if(seq!==sequence)return;rows.replaceChildren();for(const record of records){const row=document.createElement('article');row.dataset.testid='repair-row';row.dataset.id=record.id;const text=document.createElement('p');text.textContent=fields.map(f=>record[f]).join(' · ');row.append(text);const edit=document.createElement('button');edit.type='button';edit.dataset.testid='edit';edit.textContent='Edit';edit.onclick=()=>{editing=record.id;for(const f of fields)form.elements[f].value=record[f];document.querySelector('#heading').textContent='Edit repair';document.querySelector('#cancel').hidden=false;error.hidden=true;};row.append(edit);rows.append(row);}notice.textContent=records.length?'':'No repairs found';notice.dataset.state=records.length?'ready':'empty';}catch(e){if(seq===sequence){notice.textContent=e.message;notice.dataset.state='error';}}}
+form.onsubmit=async e=>{e.preventDefault();error.hidden=true;const button=form.querySelector('[data-testid=save]');button.disabled=true;try{const payload=Object.fromEntries(fields.map(f=>[f,form.elements[f].value]));const response=await fetch('/api/repairs'+(editing===null?'':'/'+editing),{method:editing===null?'POST':'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});if(!response.ok){const body=await response.json();throw Error(body.error||'Unable to save');}reset();await load();}catch(e){error.textContent='Could not save repair. '+e.message;error.hidden=false;}finally{button.disabled=false;}};
+document.querySelector('#cancel').onclick=reset;for(const id of ['search','sf','pf'])document.getElementById(id).addEventListener('input',load);load();
+</script></html>
