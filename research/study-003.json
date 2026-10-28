@@ -1,0 +1,474 @@
+{
+  "kind": "sanitized-standalone-matched-trial-evidence",
+  "recorded_at": "2026-10-28T17:45:46.846540+00:00",
+  "experiment": "exp-92226a25fdd9",
+  "configuration": {
+    "id": "trial-5d72ecd0e2114348",
+    "campaign": "campaign-ade2607f76897c3c67942a7d",
+    "suite": "ed0d0c99170ee0a27d6d7d76bcd5533334334f74349d203bf69f184574c5791f",
+    "profiles": {
+      "development": {
+        "provider": "codex-chatgpt",
+        "model": "gpt-6.1-sol",
+        "effort": "medium",
+        "runtime": "codex-cli 0.165.0-alpha.1.2",
+        "settings": {
+          "permissions": "lab-worker-v1",
+          "web_search": "disabled",
+          "execution_policy": "2b8889f83e0cc3ef34180c93ccade63a773b5207c50e808520a5d8f6a5b58ba7",
+          "environment": {
+            "platform": "Windows-11-10.0.26200-SP0",
+            "python": "3.14.7"
+          }
+        }
+      },
+      "reviewer": {
+        "provider": "codex-chatgpt",
+        "model": "gpt-6.1-sol",
+        "effort": "medium",
+        "runtime": "codex-cli 0.165.0-alpha.1.2",
+        "settings": {
+          "permissions": "lab-worker-v1",
+          "web_search": "disabled",
+          "execution_policy": "2b8889f83e0cc3ef34180c93ccade63a773b5207c50e808520a5d8f6a5b58ba7",
+          "environment": {
+            "platform": "Windows-11-10.0.26200-SP0",
+            "python": "3.14.7"
+          }
+        }
+      }
+    },
+    "stable": {
+      "commit": "f65d8bd1cae4f19ee90336097dacf6eb33b4b512",
+      "status": "",
+      "source_digest": "7c987db9f07874fc20d01a90ec382612579fb484f96276db4d3ad6ca3ad331e8"
+    },
+    "controller_digest": "2b8889f83e0cc3ef34180c93ccade63a773b5207c50e808520a5d8f6a5b58ba7",
+    "created": "2026-10-28T17:13:45.086290+00:00",
+    "finished": "2026-10-28T17:44:12.336752+00:00",
+    "order": [
+      "stable",
+      "candidate"
+    ],
+    "configuration_verified": true
+  },
+  "task_revision": "071c848d3ef3e3391e4774c114ba0cb446d8e65343cd3e0f0d120fda722101cd",
+  "benchmark_revision": "d713cb5e7dd1c30dec30e9499f3421bcfaabe54e1238e705952618c5792f8152",
+  "criteria_digest": "a8f2876655c9c2b16b05611c3d76f33534e56522708232452c7db82f28f93021",
+  "evaluator_version": "61683fe52f6394966f2c1df740795f70a5da7713ac7dcf8561fb066d84c688d9",
+  "comparison_policy": {
+    "version": 3,
+    "quality": "all mandatory criteria and independent reviews, every task",
+    "priority": [
+      "quality",
+      "observed development tokens",
+      "autonomy",
+      "time diagnostic"
+    ],
+    "confirmation": {
+      "pairs": 3,
+      "orders": 2,
+      "fresh_contexts": true,
+      "basis": "repeated quality gain OR complete token advantage without correction regression"
+    }
+  },
+  "comparison": {
+    "complete": true,
+    "missing": [],
+    "quality": {
+      "stable": true,
+      "candidate": true
+    },
+    "tokens": {
+      "stable": 947141,
+      "candidate": 1443765
+    },
+    "corrections": {
+      "stable": 0,
+      "candidate": 0
+    },
+    "task_outcomes": {
+      "repair-queue-v1": {
+        "outcome": "Resource regression observed",
+        "token_delta": 496624,
+        "correction_delta": 0
+      }
+    },
+    "outcome": "Resource regression observed",
+    "autonomy_tradeoff": false,
+    "limitations": "One suite trial is provisional. Unknown usage is not zero. Correction counts cover registered independent revisions, not inferred per-edit self-check cycles. Time is diagnostic, not a substitute for tokens."
+  },
+  "candidate": {
+    "digest": "43dc2dae7f6535bd891380651a4246056c69bd834d144c20fdbff0f5d933c548",
+    "origin_trial": "trial-0038f1aff9154d17",
+    "original_candidate_rd_known_logical_tokens": 919859,
+    "source_transfer": {
+      "kind": "qa-only-source-transfer",
+      "source_suite": "dcf11a654955b4f52bbf8b5cfdeca88380817a7270db530aafb2ea364f4afd3e",
+      "target_suite": "ed0d0c99170ee0a27d6d7d76bcd5533334334f74349d203bf69f184574c5791f",
+      "changes": [
+        {
+          "task": "repair-queue-v1",
+          "procedure": "journeys.js",
+          "before": "047e9fe1f2778074c12f7516dc04eef22f223bfe491d7ec7ef5e4ce2787ca9f0",
+          "after": "e14a05a9332b909639f7da82c8baecda71befe592c5f3b0efe1deca034fb1dc1",
+          "diff": "--- before/journeys.js\n+++ after/journeys.js\n@@ -9,14 +9,42 @@\n readline.createInterface({input:process.stdin}).on('line',line=>{const job=pending.shift();if(job){try{job.resolve(JSON.parse(line));}catch(e){job.reject(e);}}});\n function request(req){const p=()=>new Promise((resolve,reject)=>{pending.push({resolve,reject});process.stdout.write(JSON.stringify({kind:'request',request:req})+'\\n');});const result=chain.then(p);chain=result.catch(()=>{});return result;}\n setTimeout(()=>process.exit(124),110000).unref();\n+async function eventually(predicate,step){\n+ const deadline=Date.now()+6000;let lastError;\n+ do{\n+  try{if(await predicate())return;}catch(error){lastError=error;}\n+  await new Promise(resolve=>setTimeout(resolve,50));\n+ }while(Date.now()<deadline);\n+ throw Error('Timeout 6000ms waiting for '+JSON.stringify(step)+(lastError?': '+String(lastError):''));\n+}\n+\n (async()=>{\n  const browser=await chromium.launch({executablePath:config.executable,headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});\n  const context=await browser.newContext({viewport:{width:1280,height:820}});\n+ let inFlight=0;const delays=[],delayEvidence=[],routeErrors=[],delayedRequests=new WeakMap(),abortedRequests=new WeakSet();\n+ context.on('requestfailed',request=>{\n+  if(request.failure()?.errorText?.includes('ERR_ABORTED')){\n+   abortedRequests.add(request);\n+   const observation=delayedRequests.get(request);if(observation)observation.aborted_by_application=true;\n+  }\n+ });\n  await context.route('**/*',async route=>{\n   const r=route.request(),url=new URL(r.url());\n   if(url.hostname!=='repair.local')return route.abort();\n-  const x=await request({method:r.method(),path:url.pathname+url.search,body:(r.postDataBuffer()||Buffer.alloc(0)).toString('base64'),headers:r.headers()});\n-  await route.fulfill({status:x.status,headers:x.headers,body:Buffer.from(x.body,'base64')});\n+  inFlight++;\n+  try{\n+   const index=delays.findIndex(d=>r.method()==='GET'&&url.pathname===d.target);\n+   const delay=index<0?null:delays.splice(index,1)[0];\n+   const observation=delay?{target:delay.target,path:url.pathname+url.search,ms:delay.ms,consumed:true,completed:false}:null;\n+   if(observation){delayEvidence.push(observation);delayedRequests.set(r,observation);}\n+   const x=await request({method:r.method(),path:url.pathname+url.search,body:(r.postDataBuffer()||Buffer.alloc(0)).toString('base64'),headers:r.headers()});\n+   if(observation)observation.actual_backend_status=x.status;\n+   if(delay)await new Promise(resolve=>setTimeout(resolve,delay.ms));\n+   try{await route.fulfill({status:x.status,headers:x.headers,body:Buffer.from(x.body,'base64')});}\n+   catch(error){if(r.failure()?.errorText?.includes('ERR_ABORTED')){if(observation)observation.aborted_by_application=true;}else throw error;}\n+   if(observation){observation.completed=true;if(abortedRequests.has(r)||r.failure()?.errorText?.includes('ERR_ABORTED'))observation.aborted_by_application=true;}\n+  }catch(error){routeErrors.push(String(error));try{await route.abort()}catch(_){};\n+  }finally{inFlight--;}\n  });\n  const page=await context.newPage();page.setDefaultTimeout(6000);\n  const observations=[];let status='PASS';\n@@ -27,19 +55,29 @@\n    if(s.op==='fill')await node.fill(s.value);\n    else if(s.op==='click')await node.click();\n    else if(s.op==='select')await node.selectOption(s.value);\n-   else if(s.op==='wait_text')await page.waitForFunction(({selector,value})=>document.querySelector(selector)?.textContent.includes(value),s);\n-   else if(s.op==='assert_text'){const actual=await node.innerText();if(!actual.includes(s.value))throw Error('Text assertion: '+actual);}\n-   else if(s.op==='assert_count'){const actual=await node.count();if(actual!==s.count)throw Error('Count assertion: '+actual);}\n+   else if(s.op==='press')await node.press(s.value);\n+   else if(s.op==='delay_next')delays.push({target:s.target,ms:s.ms});\n+   else if(s.op==='settle'){\n+    await new Promise(resolve=>setTimeout(resolve,50));\n+    await eventually(async()=>inFlight===0&&delays.length===0,s);\n+    await new Promise(resolve=>setTimeout(resolve,50));\n+    await eventually(async()=>inFlight===0&&delays.length===0,s);\n+   }\n+   else if(s.op==='wait_text')await eventually(async()=>await node.count()>0&&(await node.first().textContent({timeout:250})).includes(s.value),s);\n+   else if(s.op==='assert_text')await eventually(async()=>await node.count()===1&&(await node.innerText({timeout:250})).includes(s.value),s);\n+   else if(s.op==='assert_count')await eventually(async()=>await node.count()===s.count,s);\n    else if(s.op==='reload')await page.reload();\n    else throw Error('Unsupported action');\n    observations.push({op:s.op,selector:s.selector||null,status:'PASS'});\n   }\n- }catch(e){status='FAIL';observations.push({status:'FAIL',detail:String(e)});}\n+ }catch(e){status='FAIL';observations.push({status:'FAIL',step:config.steps[observations.length],detail:String(e)});}\n+ if(delays.length||delayEvidence.some(x=>!x.completed)){status='FAIL';observations.push({status:'FAIL',detail:'A requested actual response delay was not consumed and completed'});}\n+ if(routeErrors.length){status='FAIL';observations.push({status:'FAIL',detail:'Actual request bridge failed',errors:routeErrors});}\n  await page.screenshot({path:'desktop.png',fullPage:true});\n  await page.setViewportSize({width:390,height:844});\n  await page.screenshot({path:'mobile.png',fullPage:true});\n  const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth);\n  if(overflow){status='FAIL';observations.push({status:'FAIL',detail:'390px horizontal overflow'});}\n- process.stdout.write(JSON.stringify({kind:'result',result:{status,observations,overflow}})+'\\n');\n+ process.stdout.write(JSON.stringify({kind:'result',result:{status,observations,overflow,delayed_responses:delayEvidence}})+'\\n');\n  await browser.close();\n })().catch(e=>{process.stdout.write(JSON.stringify({kind:'result',result:{status:'FAIL',detail:String(e)}})+'\\n');process.exitCode=1;});\n"
+        },
+        {
+          "task": "repair-queue-v1",
+          "procedure": "qa.py",
+          "before": "4a7a92dc9f8c8a3686d735cdb077e9aa0007b06cefeb264043692d7f98ec0e87",
+          "after": "1e5886bc7c4b79539b4632cef75bb105339be80d2ddd31a7e436f1c0fff1b37a",
+          "diff": "--- before/qa.py\n+++ after/qa.py\n@@ -11,15 +11,18 @@\n \n def validate_plan(plan):\n     api=plan.get('api_checks',[]);steps=plan.get('browser_steps',[])\n-    if not isinstance(api,list) or not 1<=len(api)<=30 or not isinstance(steps,list) or not 1<=len(steps)<=40:\n+    if not isinstance(api,list) or not 1<=len(api)<=30 or not isinstance(steps,list) or not 1<=len(steps)<=64:\n         raise ValueError('Reviewer must choose bounded real API and browser actions')\n     for case in api:\n         if not isinstance(case,dict) or type(case.get('expected_status')) is not int or not 100<=case['expected_status']<=599:\n             raise ValueError('Each API action needs an explicit expected HTTP status')\n     for step in steps:\n-        if not isinstance(step,dict) or step.get('op') not in ('fill','click','select','wait_text','assert_text','assert_count','reload'):\n+        if not isinstance(step,dict) or step.get('op') not in ('fill','click','select','press','delay_next','settle','wait_text','assert_text','assert_count','reload'):\n             raise ValueError('Unknown Reviewer browser action')\n-        if step['op']!='reload' and (not isinstance(step.get('selector'),str) or not step['selector']):raise ValueError('Browser selector required')\n+        if step['op'] not in ('reload','delay_next','settle') and (not isinstance(step.get('selector'),str) or not step['selector']):raise ValueError('Browser selector required')\n+        if step['op'] in ('fill','select','press','wait_text','assert_text') and not isinstance(step.get('value'),str):raise ValueError('Browser text/key value required')\n+        if step['op']=='assert_count' and (type(step.get('count'))is not int or not 0<=step['count']<=1000):raise ValueError('Bounded nonnegative element count required')\n+        if step['op']=='delay_next' and (step.get('target')!='/api/repairs' or type(step.get('ms'))is not int or not 1<=step['ms']<=2000):raise ValueError('Only bounded actual repair-list response delay is supported')\n \n \n def review_actions(source, plan, output, ada, state):\n"
+        }
+      ],
+      "scope": "ADA source/provenance only. No previous application, quality outcome, timing, tokens or score is imported. Fresh independent compatibility criticism and clean application development are required."
+    },
+    "compatibility_review_session": "01a18380-ffe2-76e3-8e6d-45a7b2251fcf",
+    "patch_sha256": "533a1b8946de00f30403889c4f16928aec75d288a11d683b1c6d331021fdc7e3"
+  },
+  "measurements": {
+    "stable": {
+      "quality": true,
+      "artifact_digest": "2febdade8a95c9c38b067774afa8634a0a95abb93ca25997b064ecca2f428b4b",
+      "tokens": 947141,
+      "configuration_verified": true,
+      "criteria": {
+        "api_crud": "PASS",
+        "validation": "PASS",
+        "search_filter": "PASS",
+        "persistence": "PASS",
+        "ui_crud": "PASS",
+        "ui_filter": "PASS",
+        "ui_error": "PASS",
+        "responsive": "PASS",
+        "ui_states": "PASS",
+        "ui_validation": "PASS"
+      },
+      "independent_status": "PASS",
+      "design_revisions": 0,
+      "correction_attempts": 0,
+      "resources": {
+        "input_tokens": 921649,
+        "output_tokens": 25492,
+        "cached_input_tokens": 812416
+      },
+      "execution_environment": {
+        "browser": "156.0.8078.73",
+        "python": "3.14.7 (tags/v3.14.7:823f032, Aug  5 2026, 10:51:32) [MSC v.1944 64 bit (AMD64)]",
+        "sandbox": "codex-cli 0.165.0-alpha.1.2",
+        "backend": "windows-mxc"
+      },
+      "observed_tokens_lower_bound": 947141,
+      "unknown_usage_stages": 0,
+      "runtime_sessions": [
+        "01a18384-1ebb-74a2-b980-ed35284220f0",
+        "01a18387-6897-7dc2-a9c4-4eaa6eae97a8",
+        "01a18389-8d0f-7bb1-8d78-970edfd88d4c",
+        "01a1838e-ef40-7df2-a0c0-85fcaedb57ed"
+      ],
+      "tool_failure_events": 0,
+      "self_check_correction_cycles": null,
+      "provider_model_calls": null,
+      "monetary_cost": null,
+      "roles": {
+        "lead": {
+          "input_tokens": 455733,
+          "output_tokens": 18857,
+          "cached_input_tokens": 419584,
+          "wall_seconds": 553.2854667
+        },
+        "reviewer": {
+          "input_tokens": 465916,
+          "output_tokens": 6635,
+          "cached_input_tokens": 392832,
+          "wall_seconds": 218.0445767
+        }
+      },
+      "timing": {
+        "development_wall_seconds": 553.2854667,
+        "review_wall_seconds": 218.0445767,
+        "development_timing_coverage": {
+          "segments": 2,
+          "known": 2,
+          "scope": "Sum of matched work segments, not lifecycle elapsed or inference-only time"
+        },
+        "review_timing_coverage": {
+          "segments": 2,
+          "known": 2,
+          "scope": "Sum of matched work segments, not lifecycle elapsed or inference-only time"
+        },
+        "total_evaluation_wall_seconds": 7.572310399999878
+      },
+      "autonomy": {
+        "human_interventions": 0,
+        "clarifications": 0,
+        "manual_recoveries": 0,
+        "testing_delegated_to_user": 0
+      },
+      "cli_stage_attempts": 4,
+      "additional_actual_checks": [
+        {
+          "attempt": "repair-queue-v1-stable-actions-0",
+          "status": "PASS",
+          "api_checks": 20,
+          "browser_step_results": [
+            {
+              "status": "PASS",
+              "steps": 36
+            }
+          ]
+        }
+      ]
+    },
+    "candidate": {
+      "quality": true,
+      "artifact_digest": "29a1f18928f98a77217cc38d24bce48072b4b3bf0430b884e7f468418510746f",
+      "tokens": 1443765,
+      "configuration_verified": true,
+      "criteria": {
+        "api_crud": "PASS",
+        "validation": "PASS",
+        "search_filter": "PASS",
+        "persistence": "PASS",
+        "ui_crud": "PASS",
+        "ui_filter": "PASS",
+        "ui_error": "PASS",
+        "responsive": "PASS",
+        "ui_states": "PASS",
+        "ui_validation": "PASS"
+      },
+      "independent_status": "PASS",
+      "design_revisions": 0,
+      "correction_attempts": 0,
+      "resources": {
+        "input_tokens": 1420056,
+        "output_tokens": 23709,
+        "cached_input_tokens": 1230464
+      },
+      "execution_environment": {
+        "browser": "156.0.8078.73",
+        "python": "3.14.7 (tags/v3.14.7:823f032, Aug  5 2026, 10:51:32) [MSC v.1944 64 bit (AMD64)]",
+        "sandbox": "codex-cli 0.165.0-alpha.1.2",
+        "backend": "windows-mxc"
+      },
+      "observed_tokens_lower_bound": 1443765,
+      "unknown_usage_stages": 0,
+      "runtime_sessions": [
+        "01a18390-bef6-7221-9d8e-3813a7c92d46",
+        "01a18393-dabb-7341-b98c-d76d524bb338",
+        "01a18394-d5fb-7b90-9409-2ebe1d777d77",
+        "01a1839a-62f7-7c90-98e3-6c959397d1f1"
+      ],
+      "tool_failure_events": 2,
+      "self_check_correction_cycles": null,
+      "provider_model_calls": null,
+      "monetary_cost": null,
+      "roles": {
+        "lead": {
+          "input_tokens": 771528,
+          "output_tokens": 16949,
+          "cached_input_tokens": 693120,
+          "wall_seconds": 524.0983128
+        },
+        "reviewer": {
+          "input_tokens": 648528,
+          "output_tokens": 6760,
+          "cached_input_tokens": 537344,
+          "wall_seconds": 207.077088
+        }
+      },
+      "timing": {
+        "development_wall_seconds": 524.0983128,
+        "review_wall_seconds": 207.077088,
+        "development_timing_coverage": {
+          "segments": 2,
+          "known": 2,
+          "scope": "Sum of matched work segments, not lifecycle elapsed or inference-only time"
+        },
+        "review_timing_coverage": {
+          "segments": 2,
+          "known": 2,
+          "scope": "Sum of matched work segments, not lifecycle elapsed or inference-only time"
+        },
+        "total_evaluation_wall_seconds": 15.407415099999525
+      },
+      "autonomy": {
+        "human_interventions": 0,
+        "clarifications": 0,
+        "manual_recoveries": 0,
+        "testing_delegated_to_user": 0
+      },
+      "cli_stage_attempts": 4,
+      "additional_actual_checks": [
+        {
+          "attempt": "repair-queue-v1-candidate-actions-0",
+          "status": "PASS",
+          "api_checks": 20,
+          "browser_step_results": [
+            {
+              "status": "PASS",
+              "steps": 36
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "prior_research_and_integration_attempts": [
+    {
+      "job": "job-db1d74f8ec2149e9",
+      "trial": null,
+      "kind": "research",
+      "status": "stopped",
+      "cli_stage_attempts": 2,
+      "known_logical_tokens": 174998,
+      "unknown_usage_stages": 1
+    },
+    {
+      "job": "job-5babbca23a99476e",
+      "trial": null,
+      "kind": "research",
+      "status": "stopped",
+      "cli_stage_attempts": 2,
+      "known_logical_tokens": 303342,
+      "unknown_usage_stages": 0
+    },
+    {
+      "job": "job-01e619af98a845df",
+      "trial": "trial-915a5afd6dca47fe",
+      "kind": "trial",
+      "status": "paused",
+      "cli_stage_attempts": 1,
+      "known_logical_tokens": 418504,
+      "unknown_usage_stages": 0
+    },
+    {
+      "job": "job-a7fe36249e2c4b73",
+      "trial": "trial-375a8aa92c514279",
+      "kind": "trial",
+      "status": "blocked",
+      "cli_stage_attempts": 2,
+      "known_logical_tokens": 481703,
+      "unknown_usage_stages": 0
+    },
+    {
+      "job": "job-c0390036c7194754",
+      "trial": "trial-7df8afb237b048f0",
+      "kind": "trial",
+      "status": "rejected",
+      "cli_stage_attempts": 1,
+      "known_logical_tokens": 76551,
+      "unknown_usage_stages": 0
+    },
+    {
+      "job": "job-39d5fac11a024225",
+      "trial": "trial-87a4dafac9aa4d01",
+      "kind": "trial",
+      "status": "blocked",
+      "cli_stage_attempts": 2,
+      "known_logical_tokens": 227388,
+      "unknown_usage_stages": 0
+    },
+    {
+      "job": "job-1d6d91d57a9d4250",
+      "trial": "trial-090c1201ed474fe1",
+      "kind": "trial",
+      "status": "rejected",
+      "cli_stage_attempts": 2,
+      "known_logical_tokens": 252433,
+      "unknown_usage_stages": 0
+    },
+    {
+      "job": "job-d407793440c748c4",
+      "trial": "trial-0038f1aff9154d17",
+      "kind": "trial",
+      "status": "blocked",
+      "cli_stage_attempts": 6,
+      "known_logical_tokens": 1298845,
+      "unknown_usage_stages": 0
+    },
+    {
+      "job": "job-6a407a728151401e",
+      "trial": "trial-d6a8bb5849734ebd",
+      "kind": "trial",
+      "status": "blocked",
+      "cli_stage_attempts": 4,
+      "known_logical_tokens": 1678823,
+      "unknown_usage_stages": 0
+    },
+    {
+      "job": "job-8735662f2da54098",
+      "trial": "trial-cfe23d134a114c7a",
+      "kind": "trial",
+      "status": "paused",
+      "cli_stage_attempts": 5,
+      "known_logical_tokens": 1302533,
+      "unknown_usage_stages": 0
+    }
+  ],
+  "prior_attempts_known_logical_tokens": 6215120,
+  "prior_attempts_unknown_usage_stages": 1,
+  "current_campaign_usage": {
+    "calls": 9,
+    "known_tokens": 2722834,
+    "unknown_usage_stages": 0,
+    "reserved_calls": 0,
+    "reserved_tokens": 0
+  },
+  "telemetry_limits": {
+    "logical_tokens": "Input plus output; cached input is a subset and is never added twice. Both Lead and independent Reviewer are included in application totals; roles are separate.",
+    "provider_requests": null,
+    "money": null,
+    "supervising_chat_and_reviewer_chat_tokens": null,
+    "cpu_peak_memory": null,
+    "self_check_source_edit_cycles": null,
+    "hard_provider_token_spend_limit": false
+  },
+  "champion": null,
+  "production_promoted": false,
+  "verification": {
+    "regression": {
+      "status": "PASS",
+      "tests": 111,
+      "seconds": 125.396
+    },
+    "native_calibration": {
+      "status": "PASS",
+      "reference_criteria": 10,
+      "broken_controls": [
+        "persistence",
+        "validation",
+        "search_filter"
+      ],
+      "evaluator_version": "61683fe52f6394966f2c1df740795f70a5da7713ac7dcf8561fb066d84c688d9"
+    },
+    "ui": {
+      "status": "PASS",
+      "desktop_mobile_tab_views": 10,
+      "actual_application_images": 4,
+      "application_source_archives_verified": 2
+    },
+    "external_common_supplement": {
+      "plan_sha256": "b6899f9cdcd29101f55a72c20c7d1132c0940a5e817fa3ae4071f28f71f1d999",
+      "api_cases": 7,
+      "browser_steps": 46,
+      "stable": "PASS",
+      "candidate": "PASS",
+      "exact_source_and_visual_review": "PASS",
+      "source_unchanged": true,
+      "candidate_precheck_attempts": "Two external verifier setup attempts stopped before application checks: native sentinel cleanup timeout and wrong Python without Playwright. Preserved separately, then identical plan passed; outside primary CLI measurements."
+    },
+    "restart_resume": {
+      "status": "PASS",
+      "scope": "Earlier blocked integration trial",
+      "completed_model_sessions_preserved": 3,
+      "no_automatic_model_replay": true
+    },
+    "multi_task": {
+      "status": "PASS",
+      "tasks": 3,
+      "scope": "Deterministic injected adapters; not three real generated applications"
+    }
+  }
+}

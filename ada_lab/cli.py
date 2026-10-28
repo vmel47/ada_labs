@@ -15,6 +15,7 @@ def main():
     commands = parser.add_subparsers(dest='command', required=True)
     init = commands.add_parser('init'); init.add_argument('--ada')
     commands.add_parser('doctor'); commands.add_parser('calibrate'); commands.add_parser('history')
+    serve = commands.add_parser('serve'); serve.add_argument('--port',type=int,default=8765); serve.add_argument('--open',action='store_true')
     for name in ('prepare', 'evolve'):
         sub = commands.add_parser(name)
         sub.add_argument('--hypothesis'); sub.add_argument('--benchmark', default='repair-queue-v1')
@@ -37,7 +38,11 @@ def main():
     args = parser.parse_args(); lab = Lab(args.state)
     try:
         name = args.command
-        if name == 'init':
+        if name == 'serve':
+            from .web import serve
+            serve(args.port,args.open)
+            return
+        elif name == 'init':
             result = lab.initialize(args.ada)
             from .native import browser_executable
             try:

@@ -1,8 +1,25 @@
 # ADA Lab
 
-ADA Lab prepares, evaluates and remembers experiments on ADA. You direct the work in your existing coding chat. ADA supplies the development protocol; this repository supplies the benchmark, isolated application evaluator, comparison and durable research state.
+ADA Labs researches and evaluates changes to ADA through real software development. Its local browser application controls persistent campaigns, independently criticized ideas and matched benchmark trials. Stable ADA is never automatically changed.
 
 ## Start
+
+Open **`Run.bat`**. It bootstraps the local Python environment, starts the application and opens `http://127.0.0.1:8765`. Ordinary experiments use the interface. Reopening retains history and waits for explicit continuation of pending work.
+
+Requires Python 3.11+, Git and an installed Codex CLI signed in with the existing ChatGPT subscription. Installed desktop CLI binaries are discovered without depending on the supervising chat's PATH. Chrome/Edge or Playwright Chromium provides real browser QA. No WSL, Docker, paid API key or new cloud service is required. Unsupported capabilities remain BLOCKED.
+
+1. In **Suites & settings**, choose an immutable suite and explicit development, Reviewer and research model/effort profiles. Equivalent profiles resume the same campaign.
+2. In **Research**, generate and independently critique ideas. Inspect sources, objections and priority; pause or stop without losing reviewed ideas.
+3. Test one reviewed idea or run the affordable ranked shortlist. The controller develops fresh Stable/candidate applications, executes real API/browser QA and obtains separate source/visual review.
+4. Inspect per-task results, measured tokens, sources and desktop/mobile screenshots. Pause or close, then explicitly resume saved checkpoints. Back up evidence locally.
+
+The adapter records requested and runtime-observed model/effort/provider, session IDs and direct token events. Provider-side rerouting is not independently attested. Subscription quota, tokens and configured budgets are distinct units; no paid API fallback is implemented.
+
+An accepted ADA candidate can be reused with fresh applications without repeating its development. A browser-action interpreter/validator revision additionally requires an exact compatibility manifest and a fresh independent compatibility review; it creates a new campaign and never imports previous application results.
+
+Currently the full automatic ADA candidate regression path supports Markdown-only changes with every executable/configuration byte pinned to trusted production. Code/configuration candidates remain BLOCKED where the required native Git/MSYS fixtures cannot execute. Generated benchmark applications still run exclusively in native isolation; see [the trust boundary](docs/architecture.md).
+
+## Legacy CLI start
 
 Requires Python 3.11+, Git and an installed Codex sandbox helper. Run from this canonical checkout:
 
@@ -19,7 +36,7 @@ python start.py evolve --model gpt-6.1-sol
 
 The state core uses portable Python/filesystem operations. Windows native evaluation is exercised directly. The platform sandbox adapter probes the machine before executing artifacts and reports missing capabilities honestly. A successful run on one platform is not a promise about untested OS versions or policies.
 
-## Experiment cycle
+## Legacy current-chat experiment cycle
 
 1. `prepare` or `evolve` freezes stable ADA, the benchmark, evaluator identity and configuration, then writes a research handoff under `.lab/experiments/ID/`.
 2. Read previous conclusions, form a hypothesis and develop it in `candidate-working`. Obtain independent criticism and freeze it with `candidate`.
@@ -52,3 +69,5 @@ No automatic promotion modifies production ADA. A successful candidate is delive
 The [first pilot](research/README.md) completed both real application runs. Both met mandatory quality; one pair does not demonstrate an efficiency advantage.
 
 The [measured Repair Queue trial](research/study-002.md) completed two new independently developed applications, actual corrections and repeatable native evaluation. Both final applications passed; the negative-case-matrix candidate had two late validation findings versus zero in stable. Its primary hypothesis was not supported. The report includes measured stage durations, comparison limitations and exact repetition instructions.
+
+The [standalone campaign study](research/study-003.md) completes another new clean Stable/candidate pair through the local application. Both pass all ten criteria and common independent API/browser supplements. The verbose-output instruction consumed 52.434% more observed application-workflow logical tokens; it is retained as a negative result. The report records explicit runtime profiles, startup/incomplete attempts, measured roles, pause/restart recovery and exact repetition instructions.

@@ -16,11 +16,17 @@ def main():
         subprocess.run([sys.executable, '-m', 'venv', str(environment)], check=True)
     identity = hashlib.sha256((root / 'pyproject.toml').read_bytes()).hexdigest()
     marker = root / '.lab' / 'installation.json'
-    installed = json.loads(marker.read_text()) if marker.exists() else {}
+    installed = json.loads(marker.read_text(encoding='utf-8')) if marker.exists() else {}
     if installed.get('project_digest') != identity:
         subprocess.run([str(python), '-m', 'pip', 'install', '-e', str(root)], check=True)
         marker.parent.mkdir(parents=True, exist_ok=True)
         marker.write_text(json.dumps({'project_digest': identity}), encoding='utf-8')
+    if sys.argv[1:]==['launch']:
+        log=root/'.lab'/'server.log'
+        with log.open('ab') as output:
+            subprocess.Popen([str(python),'-m','ada_lab','serve','--open'],cwd=root,stdout=output,stderr=output,
+                creationflags=subprocess.CREATE_NO_WINDOW if sys.platform=='win32' else 0,start_new_session=sys.platform!='win32')
+        return
     result = subprocess.run([str(python), '-m', 'ada_lab', *sys.argv[1:]], cwd=root)
     raise SystemExit(result.returncode)
 

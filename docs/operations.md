@@ -1,4 +1,20 @@
-# Operating from the current coding session
+# Operating ADA Labs
+
+## Browser application
+
+Open `Run.bat`, choose **Suites & settings**, select the ordered suite and explicit development/Reviewer/research model profiles, then **Open campaign**. Exact suite/model/effort/provider/runtime/execution-policy inputs determine the fingerprint; display names do not. Default address: `http://127.0.0.1:8765`.
+
+**Research ideas** runs bounded Researcher–Critic iterations. Inspect mechanisms, actual source retrieval dates/hashes, objections and research priority. Missing retrieval stays unverified. Change iteration count, shortlist and threshold in settings. **Test this idea** starts one reviewed candidate; **Run ranked shortlist** admits sequential candidates while resources permit. Untested/unsuccessful ideas and previous results stay retained.
+
+**Pause** finishes the current model stage and checkpoints before the next. **Stop** cancels active work and retains partial/unknown usage. Research and benchmark controls are separate. **Close Lab**, reopen `Run.bat`, select the campaign and explicitly continue; completed input-bound stages/tasks are reused. Changed inputs are not silently rebound to old evidence.
+
+History displays per-task quality, actual resources, source downloads and real desktop/mobile images. Registered correction counts are independent-finding source revisions; self-check tool failures are retained separately, not guessed as per-edit cycles. Token totals include known Lead/Reviewer/correction/retry usage; cached input is a subset, not an extra amount. Unknown totals remain null. Subscription percentages are not task token balances.
+
+Budget controls reserve whole-suite model stages and conservative token estimates with correction allowance/reserve. They cannot enforce a hard provider token ceiling from post-execution reports. Exhausted supported subscription windows stop admission; no paid API fallback, credit purchase or quota reset is invoked. Opening a campaign never restarts broad research automatically.
+
+Use **Back up evidence** after pausing. The local ZIP contains campaign state, experiment/evaluation evidence and an integrity manifest; it is not published to Git. Keep a protected separate copy. Task registration accepts prepared folders under `benchmarks/`; additional environments require installed independently verified adapters. Real signing, transfers and production broadcasting are not supported or authorized.
+
+## Legacy current-chat workflow
 
 The coding assistant runs these commands while working. The owner can simply ask the current chat to continue improving ADA. No second Codex session or separate model login is started.
 

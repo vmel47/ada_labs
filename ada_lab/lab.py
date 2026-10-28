@@ -12,6 +12,7 @@ from datetime import datetime
 
 from .files import ROOT, copy_tree, digest, git, identity, inventory, lock, now, read, safe_id, tree_digest, write
 from . import evaluator, sandbox
+from .stateio import write
 
 SCHEMA = 2
 VARIANTS = ('stable', 'candidate', 'single')
@@ -144,7 +145,7 @@ class Lab:
                 raise RuntimeError('Experiment is paused')
             if len(record['sessions']) >= record['limits']['max_sessions']:
                 raise RuntimeError('Session admission budget exhausted')
-            if record['model'] and model and record['model'] != model:
+            if role == 'lead' and record['model'] and model and record['model'] != model:
                 raise ValueError('Model differs from frozen experiment model')
             if record['model'] is None and model:
                 if record['sessions']:
@@ -179,7 +180,7 @@ class Lab:
                 end_ns = time.monotonic_ns()
                 elapsed = (end_ns - timer['start_ns']) / 1_000_000_000
                 utc_elapsed = (datetime.fromisoformat(finished) - datetime.fromisoformat(timer['utc_start'])).total_seconds()
-                continuous = elapsed >= 0 and abs(utc_elapsed - elapsed) <= 5
+                continuous = elapsed >= 0 and abs(utc_elapsed - elapsed) <= 5 and not receipt.get('recovered_after_restart')
                 timer.update(end_ns=end_ns, utc_end=finished, continuity_verified=continuous)
                 receipt['wall_seconds'] = elapsed if continuous else None
                 receipt['timing_source'] = timer['source'] if continuous else 'Clock continuity uncertain; duration unknown'
@@ -486,10 +487,14 @@ class Lab:
                 if evaluation and any(evaluation.get(key) != record[key] for key in ('benchmark_revision', 'criteria_digest', 'evaluator_version')):
                     invalid = True
                     reasons.append('Evaluation does not match frozen benchmark, criteria or evaluator')
-                observed = {session.get('model') for session in record['sessions'] if session.get('variant') in ('stable', 'candidate')}
+                observed = {session.get('model') for session in record['sessions'] if session.get('variant') in ('stable', 'candidate') and session.get('role') == 'lead'}
                 if observed and observed != {record['model']}:
                     invalid = True
                     reasons.append('Observed session models differ from the frozen configuration')
+            reviewer_models = [{s.get('model') for s in record['sessions'] if s.get('variant') == arm and s.get('role') == 'reviewer'} for record, arm in ((left,'stable'),(right,'candidate'))]
+            if all(reviewer_models) and reviewer_models[0] != reviewer_models[1]:
+                invalid = True
+                reasons.append('Independent reviewer models differ across arms')
             blocked = any(any(item['status'] == 'BLOCKED' for item in r.get('evaluation', {}).get('criteria', {}).values()) for r in runs)
             quality = [r.get('evaluation', {}).get('quality_pass') for r in runs]
             active = any(session['status'] == 'active' for record in (left, right) for session in record['sessions'])

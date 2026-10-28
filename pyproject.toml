@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ada-lab"
-version = "0.1.0"
+version = "0.2.0"
 description = "Local, evidence-based experiments for Agent Development Architecture"
 requires-python = ">=3.11"
 dependencies = ["playwright==1.64.1"]
@@ -16,4 +16,4 @@ ada-lab = "ada_lab.cli:main"
 packages = ["ada_lab"]
 
 [tool.setuptools.package-data]
-ada_lab = ["*.js"]
+ada_lab = ["*.js", "ui/*.html", "ui/*.css", "ui/*.js"]

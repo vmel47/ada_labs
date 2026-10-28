@@ -32,6 +32,17 @@ class CoreTests(unittest.TestCase):
     def prepare(self, max_sessions=12):
         return self.lab.prepare(model='unit-fixture-model', max_sessions=max_sessions)['experiment']
 
+    def test_legacy_record_retries_transient_windows_replace_denial(self):
+        identifier=self.prepare();record=self.lab.load(identifier);record['retry_probe']='saved'
+        attempts=[]
+        def flaky(path,value):
+            attempts.append(path)
+            if len(attempts)==1:raise PermissionError('Transient scanner fixture')
+            return write(path,value)
+        with patch('ada_lab.stateio.atomic_write',side_effect=flaky):self.lab.save(record)
+        self.assertEqual(len(attempts),2)
+        self.assertEqual(self.lab.load(identifier)['retry_probe'],'saved')
+
     def test_atomic_state_survives_new_process(self):
         path = Path(self.temp.name)/'state.json'
         write(path, {'status':'paused','cost':None})
@@ -205,6 +216,24 @@ class CoreTests(unittest.TestCase):
             self.lab.finish(identifier,segment['id'],{'status':'completed','source_ref':'unit fixture'})
         self.assertIsNone(self.lab.load(identifier)['sessions'][0]['wall_seconds'])
 
+    def test_recovered_stage_does_not_claim_downtime_as_development(self):
+        identifier=self.prepare();segment=self.lab.begin(identifier,'lead','lead','stable',source_ref='unit fixture',timed=True)
+        self.lab.finish(identifier,segment['id'],{'status':'interrupted','source_ref':'actual recovery fixture','recovered_after_restart':True})
+        self.assertIsNone(self.lab.load(identifier)['sessions'][0]['wall_seconds'])
+
+    def test_explicit_separate_reviewer_model_does_not_change_development_profile(self):
+        identifier=self.prepare()
+        self.lab.begin(identifier,'reviewer','reviewer','stable',model='stronger-reviewer-fixture',source_ref='unit fixture')
+        self.assertEqual(self.lab.load(identifier)['model'],'unit-fixture-model')
+        with self.assertRaises(ValueError):self.lab.begin(identifier,'lead','lead','stable',model='wrong-developer',source_ref='unit fixture')
+
+    def test_mismatched_reviewer_models_invalidate_comparison(self):
+        identifier,record=self.comparison_fixture()
+        for variant,model in [('stable','reviewer-one'),('candidate','reviewer-two')]:
+            sample=dict(record['sessions'][0]);sample.update(role='reviewer',variant=variant,model=model);record['sessions'].append(sample)
+        self.lab.save(record)
+        self.assertEqual(self.lab.compare(identifier)['outcome'],'Invalid experiment')
+
     def comparison_fixture(self):
         identifier=self.prepare();record=self.lab.load(identifier)
         artifact=Path(self.temp.name)/'efficiency-fixture';artifact.mkdir();(artifact/'app.py').write_text('unit fixture')
@@ -278,7 +307,9 @@ class WrapperIntegrationTests(unittest.TestCase):
             with socket.socket() as sock:
                 sock.bind(('127.0.0.1',0));port=sock.getsockname()[1]
             with (folder/'server.log').open('wb') as log:
-                process=subprocess.Popen([sys.executable,'server.py','--port',str(port),'--data',str(folder/'unused.sqlite')],cwd=folder,stdout=log,stderr=log)
+                # This stdlib fixture needs no venv; launch the real interpreter so
+                # terminating it cannot leave a Windows venv redirector child alive.
+                process=subprocess.Popen([getattr(sys,'_base_executable',sys.executable),'server.py','--port',str(port),'--data',str(folder/'unused.sqlite')],cwd=folder,stdout=log,stderr=log)
                 try:
                     deadline=time.monotonic()+5
                     while True:
