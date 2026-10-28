@@ -7,12 +7,17 @@ import shutil
 import uuid
 import math
 import time
+import hashlib
+from datetime import datetime
 
 from .files import ROOT, copy_tree, digest, git, identity, inventory, lock, now, read, safe_id, tree_digest, write
 from . import evaluator, sandbox
 
 SCHEMA = 2
 VARIANTS = ('stable', 'candidate', 'single')
+COMPARISON_POLICY = {'version': 2, 'seconds_absolute_tolerance': 1.0,
+                     'seconds_relative_tolerance': 0.02,
+                     'scope': 'Observed directions only; one pair does not establish reliability'}
 
 
 class Lab:
@@ -85,6 +90,7 @@ class Lab:
             'evaluator_version': evaluator.version(), 'model': model,
             'environment': {'platform': platform.platform(), 'python': platform.python_version(), 'transport': 'native-stdio-v1'},
             'limits': {'max_sessions': max_sessions}, 'sessions': [], 'runs': {}, 'research': [],
+            'comparison_policy': dict(COMPARISON_POLICY),
             'autonomy': {'human_interventions': 0, 'clarifications': 0, 'manual_recoveries': 0, 'testing_delegated_to_user': 0},
             'next_action': 'Read research handoff in the current coding session; create and independently review an isolated ADA candidate.'}
         self.save(record)
@@ -115,7 +121,9 @@ class Lab:
             copy_tree(folder / 'stable', working)
         packet = {'experiment': identifier, 'hypothesis': record['hypothesis'],
             'stable_revision': record['stable']['commit'], 'working_copy': str(working),
-            'previous_conclusions': [{'id': r['id'], 'hypothesis': r['hypothesis'], 'comparison': r.get('comparison')} for r in self.history() if r['id'] != identifier][-10:],
+            'previous_conclusions': [{'id': r['id'], 'hypothesis': r['hypothesis'],
+                'comparison': {key: r.get('comparison', {}).get(key) for key in ('outcome', 'quality', 'recommendation')}}
+                for r in self.history() if r['id'] != identifier][-10:],
             'instructions': ['Work in the current coding chat. ADA Lab does not start another AI runtime.',
                 'Inspect ADA and history; propose a falsifiable change and seek independent design criticism.',
                 'Implement the change only in working_copy. Keep production ADA unchanged.',
@@ -124,7 +132,7 @@ class Lab:
         write(folder / 'research-handoff.json', packet)
         return packet
 
-    def begin(self, identifier, observer, role, variant=None, model=None, source_ref=None):
+    def begin(self, identifier, observer, role, variant=None, model=None, source_ref=None, timed=False, stage=None):
         if role not in ('lead', 'reviewer', 'research') or variant not in (*VARIANTS, None):
             raise ValueError('Invalid session role or variant')
         if not observer or not source_ref:
@@ -146,6 +154,9 @@ class Lab:
                 'variant': variant, 'model': model or record['model'], 'source_ref': source_ref, 'status': 'active',
                 'started': now(), 'input_tokens': None, 'output_tokens': None, 'cached_input_tokens': None,
                 'model_calls': None, 'monetary_cost': None, 'wall_seconds': None}
+            if timed:
+                entry['timer'] = {'start_ns': time.monotonic_ns(), 'utc_start': entry['started'],
+                                  'stage': stage, 'source': 'controller dispatch-to-completion monotonic clock'}
             record['sessions'].append(entry)
             record['status'] = 'working'
             self.save(record)
@@ -159,6 +170,19 @@ class Lab:
                 raise ValueError('Session already closed; previous accounting is immutable')
             if receipt.get('status') not in ('completed', 'failed', 'interrupted') or not receipt.get('source_ref'):
                 raise ValueError('Observed status and source reference are required')
+            receipt = dict(receipt)
+            finished = now()
+            if session.get('timer'):
+                if receipt.get('wall_seconds') is not None:
+                    raise ValueError('A controller-timed segment cannot override its measured duration')
+                timer = session['timer']
+                end_ns = time.monotonic_ns()
+                elapsed = (end_ns - timer['start_ns']) / 1_000_000_000
+                utc_elapsed = (datetime.fromisoformat(finished) - datetime.fromisoformat(timer['utc_start'])).total_seconds()
+                continuous = elapsed >= 0 and abs(utc_elapsed - elapsed) <= 5
+                timer.update(end_ns=end_ns, utc_end=finished, continuity_verified=continuous)
+                receipt['wall_seconds'] = elapsed if continuous else None
+                receipt['timing_source'] = timer['source'] if continuous else 'Clock continuity uncertain; duration unknown'
             for key in ('input_tokens', 'output_tokens', 'cached_input_tokens', 'model_calls', 'monetary_cost', 'wall_seconds'):
                 value = receipt.get(key)
                 if value is not None and (type(value) not in (int, float) or value < 0):
@@ -166,7 +190,7 @@ class Lab:
                 if value is not None and (not math.isfinite(value) or (key not in ('monetary_cost', 'wall_seconds') and type(value) is not int)):
                     raise ValueError('Measurement must be finite and token/call counts must be integers: ' + key)
                 session[key] = value
-            session.update(status=receipt['status'], finished=now(), receipt=receipt)
+            session.update(status=receipt['status'], finished=finished, receipt=receipt)
             self.save(record)
             return session
 
@@ -239,7 +263,9 @@ class Lab:
                 shutil.copyfile(folder / 'benchmark' / 'task.md', workspace / 'TASK.md')
             if variant != 'single' and not (workspace / 'ada').exists():
                 copy_tree(folder / variant, workspace / 'ada')
-            record['runs'].setdefault(variant, {'status': 'prepared', 'workspace': str(workspace), 'reviews': {}, 'attempts': []})
+            record['runs'].setdefault(variant, {'status': 'prepared', 'workspace': str(workspace), 'reviews': {}, 'attempts': [],
+                'corrections': [], 'autonomy': {'human_interventions': 0, 'clarifications': 0,
+                'manual_recoveries': 0, 'testing_delegated_to_user': 0}})
             packet = {'experiment': identifier, 'variant': variant, 'workspace': str(workspace),
                 'task': str(workspace / 'TASK.md'), 'benchmark_revision': record['benchmark_revision'],
                 'ada_revision': record['stable']['commit'] if variant == 'stable' else record.get('candidate', {}).get('source_digest') if variant == 'candidate' else None,
@@ -286,7 +312,11 @@ class Lab:
             if receipt['after_digest'] != tree_digest(run['workspace']) or receipt['before_digest'] == receipt['after_digest']:
                 raise ValueError('Correction must bind an actual changed workspace')
             findings = [entry['receipt'] for entry in run.get('review_history', []) if entry['receipt']['status'] == 'FAIL']
-            if not any(entry['subject_digest'] == receipt['before_digest'] for entry in findings):
+            if receipt.get('origin') == 'self-check':
+                failure = receipt.get('failure', {})
+                if type(failure.get('returncode')) is not int or failure['returncode'] == 0 or not failure.get('argv') or failure.get('subject_digest') != receipt['before_digest']:
+                    raise ValueError('Self-correction requires a real failed command bound to the previous source')
+            elif not any(entry['subject_digest'] == receipt['before_digest'] for entry in findings):
                 raise ValueError('No recorded independent failure against the previous source')
             corrections = run.setdefault('corrections', [])
             if receipt not in corrections:
@@ -402,6 +432,32 @@ class Lab:
             return {'id': identifier, 'status': record['status'], 'next_action': record['next_action'],
                     'runs': record['runs'], 'active_sessions': [s for s in record['sessions'] if s['status'] == 'active']}
 
+    @staticmethod
+    def efficiency_comparison(left, right, policy):
+        dimensions = ['development_wall_seconds', 'review_wall_seconds', 'correction_attempts',
+                      'input_tokens', 'output_tokens', 'model_calls', 'monetary_cost']
+        comparisons = {}
+        values = [(key, left.get(key), right.get(key)) for key in dimensions]
+        for key in ('human_interventions', 'clarifications', 'manual_recoveries', 'testing_delegated_to_user'):
+            values.append((key, left['autonomy'].get(key) if left['autonomy_scope'] == 'variant' else None,
+                           right['autonomy'].get(key) if right['autonomy_scope'] == 'variant' else None))
+        for key, baseline, candidate in values:
+            item = {'baseline': baseline, 'candidate': candidate, 'delta': None, 'percent': None,
+                    'direction': 'unknown', 'lower_is_better': True, 'tolerance': None}
+            if baseline is not None and candidate is not None:
+                delta = candidate - baseline
+                tolerance = max(policy['seconds_absolute_tolerance'], abs(baseline) * policy['seconds_relative_tolerance']) if key.endswith('_seconds') else 0
+                item.update(delta=delta, percent=100 * delta / baseline if baseline else None,
+                            tolerance=tolerance, direction='equal' if abs(delta) <= tolerance else 'improved' if delta < 0 else 'regressed')
+            comparisons[key] = item
+        directions = {item['direction'] for item in comparisons.values()} - {'unknown', 'equal'}
+        outcome = ('Trade-off observed' if directions == {'improved', 'regressed'} else
+                   'Improvement observed' if directions == {'improved'} else
+                   'Regression observed' if directions == {'regressed'} else
+                   'No demonstrated advantage' if any(item['direction'] == 'equal' for item in comparisons.values()) else
+                   'Inconclusive result')
+        return outcome, comparisons
+
     def compare(self, identifier, other=None):
         ids = sorted(set([identifier, other or identifier]))
         from contextlib import ExitStack
@@ -411,7 +467,7 @@ class Lab:
             left = self.load(identifier)
             right = self.load(other) if other else left
             differences = {key: {'left': left.get(key), 'right': right.get(key)} for key in
-                ('benchmark_revision', 'criteria_digest', 'evaluator_version', 'model', 'environment', 'limits') if left.get(key) != right.get(key)}
+                ('benchmark_revision', 'criteria_digest', 'evaluator_version', 'model', 'environment', 'limits', 'comparison_policy') if left.get(key) != right.get(key)}
             runs = [left['runs'].get('stable', {}), right['runs'].get('candidate', {})]
             observed_environments = [self.observed_environment(run) for run in runs]
             if observed_environments[0] != observed_environments[1] and all(run.get('evaluation') for run in runs):
@@ -436,6 +492,10 @@ class Lab:
                     reasons.append('Observed session models differ from the frozen configuration')
             blocked = any(any(item['status'] == 'BLOCKED' for item in r.get('evaluation', {}).get('criteria', {}).values()) for r in runs)
             quality = [r.get('evaluation', {}).get('quality_pass') for r in runs]
+            active = any(session['status'] == 'active' for record in (left, right) for session in record['sessions'])
+            measurements = {'left': self.measurements(left, 'stable'), 'right': self.measurements(right, 'candidate')}
+            metric_comparisons = {}
+            policy = left.get('comparison_policy', {'version': 1})
             if differences or invalid:
                 outcome = 'Invalid experiment'
                 if differences:
@@ -443,27 +503,37 @@ class Lab:
             elif left['model'] is None or right['model'] is None:
                 outcome = 'Inconclusive result'
                 reasons.append('Development model identity is unknown')
-            elif incomplete or blocked:
+            elif incomplete or blocked or active:
                 outcome = 'Inconclusive result'
-                reasons.append('Required artifact/evaluation evidence is incomplete' if incomplete else 'Evaluator capability is BLOCKED, not an observed application regression')
+                reasons.append('Registered work is still active' if active else 'Required artifact/evaluation evidence is incomplete' if incomplete else 'Evaluator capability is BLOCKED, not an observed application regression')
             elif quality == [True, False]:
                 outcome = 'Regression observed'
                 reasons.append('Stable meets mandatory quality; candidate does not')
             elif quality == [False, True]:
                 outcome = 'Improvement observed'
                 reasons.append('Candidate meets mandatory quality; stable does not')
+            elif quality == [True, True] and policy['version'] >= 2:
+                outcome, metric_comparisons = self.efficiency_comparison(measurements['left'], measurements['right'], policy)
+                reasons.append('Both meet mandatory quality; conclusion describes only the separately comparable observed efficiency dimensions')
+                if any(item['direction'] == 'unknown' for item in metric_comparisons.values()):
+                    reasons.append('Unknown dimensions remain non-comparable and do not establish overall efficiency')
             else:
                 outcome = 'No demonstrated advantage'
                 reasons.append('Both meet mandatory quality; one pair and incomplete provider telemetry cannot establish efficiency' if quality == [True, True] else 'Neither application meets mandatory quality')
             result = {'left': identifier, 'right': right['id'], 'outcome': outcome, 'quality': quality,
                 'observed_execution_environments': observed_environments,
-                'differences': differences, 'reasons': reasons, 'measurements': {'left': self.measurements(left, 'stable'), 'right': self.measurements(right, 'candidate')},
-                'uncertainty': 'One pair cannot establish reliable superiority. Stable-first order and shared lead context allow carryover. Public tests are not holdouts. Session provenance is declared and must be checked against actual chat/tool records.',
+                'differences': differences, 'reasons': reasons, 'measurements': measurements,
+                'comparison_policy': policy, 'metric_comparisons': metric_comparisons,
+                'comparison_source_digest': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+                'uncertainty': 'One pair cannot establish reliable superiority. Sequential order and public known tests can bias observations. Session provenance and context independence must be checked against actual chat/tool records.',
                 'recommendation': 'Retain evidence, refine or repeat under matched conditions. Production ADA promotion requires separate review.'}
             if not other:
+                previous = left.get('comparison')
+                if previous and previous != result:
+                    left.setdefault('comparison_history', []).append({'archived': now(), 'comparison': previous})
                 left['comparison'] = result
                 left['next_action'] = result['recommendation']
-                if not incomplete and not blocked:
+                if not incomplete and not blocked and not active:
                     left['status'] = 'invalid' if invalid or differences else 'completed'
                     left.setdefault('finished', now())
                 self.save(left)
@@ -475,10 +545,17 @@ class Lab:
             'declared_observers': len({s['observer'] for s in sessions}),
             'failed_work_segments': sum(s['status'] in ('failed', 'interrupted') for s in sessions),
             'categories': {role: sum(s['role'] == role for s in sessions) for role in ('research', 'lead', 'reviewer')},
-            'autonomy': record['autonomy']}
+            'autonomy': record['runs'].get(variant, {}).get('autonomy', record['autonomy']),
+            'autonomy_scope': 'variant' if variant in record['runs'] and 'autonomy' in record['runs'][variant] else 'legacy experiment-wide'}
         for key in ('input_tokens', 'output_tokens', 'cached_input_tokens', 'model_calls', 'monetary_cost', 'wall_seconds'):
             values = [s[key] for s in sessions]
             result[key] = sum(values) if values and all(v is not None for v in values) else None
+        for role, label in [('lead', 'development'), ('reviewer', 'review'), ('research', 'research')]:
+            selected = [session for session in sessions if session['role'] == role]
+            times = [session['wall_seconds'] for session in selected]
+            result[label + '_wall_seconds'] = sum(times) if times and all(value is not None for value in times) and all(session['status'] != 'active' for session in selected) else None
+            result[label + '_timing_coverage'] = {'segments': len(selected), 'known': sum(value is not None for value in times),
+                                                  'scope': 'Sum of matched work segments, not lifecycle elapsed or inference-only time'}
         result['latest_evaluation'] = {key: run.get('evaluation', {}).get('accounting') for key, run in record['runs'].items() if variant is None or key == variant}
         history = []
         for key, run in record['runs'].items():
@@ -499,6 +576,8 @@ class Lab:
         times = [entry.get('wall_seconds') for entry in history]
         result['total_evaluation_wall_seconds'] = sum(times) if times and all(value is not None for value in times) else None
         result['correction_attempts'] = sum(len(run.get('corrections', [])) for key, run in record['runs'].items() if variant is None or key == variant)
+        result['self_check_corrections'] = sum(entry.get('origin') == 'self-check' for key, run in record['runs'].items() if variant is None or key == variant for entry in run.get('corrections', []))
+        result['environment_retries'] = [event for session in sessions for event in session.get('receipt', {}).get('environment_retries', [])]
         result['independent_review_observations'] = sum(len(run.get('reviews', {})) for key, run in record['runs'].items() if variant is None or key == variant)
         result['coverage'] = 'Recorded current-session work only; unknown provider usage is not estimated.'
         return result
@@ -510,6 +589,18 @@ class Lab:
                 'started': record['created'], 'finished': record.get('finished'),
                 'stable_revision': record['stable']['commit'], 'candidate': record.get('candidate'),
                 'benchmark_revision': record['benchmark_revision'], 'comparison': record.get('comparison'),
-                'measurements': self.measurements(record), 'next_action': record['next_action']}
+                'measurements': self.measurements(record), 'next_action': record['next_action'],
+                'configuration': {key: record.get(key) for key in ('model', 'environment', 'benchmark', 'benchmark_revision',
+                    'criteria_digest', 'evaluator_version', 'comparison_policy')},
+                'runs': {variant: {'status': run['status'], 'artifact': run.get('artifact'),
+                    'artifact_digest': run.get('artifact_digest'), 'criteria': run.get('evaluation', {}).get('criteria', {}),
+                    'quality_pass': run.get('evaluation', {}).get('quality_pass'),
+                    'reviews': {phase: receipt['status'] for phase, receipt in run.get('reviews', {}).items()},
+                    'measurements': self.measurements(record, variant)} for variant, run in record['runs'].items()},
+                'blocker': record.get('blocker'), 'analysis': record.get('analysis'),
+                'study_design': record.get('study_design'),
+                'repeat': {'prepare_argv': ['python', 'start.py', 'prepare', '--benchmark', record['benchmark'], '--model', record['model'] or 'CURRENT_MODEL'],
+                    'required_benchmark_revision': record['benchmark_revision'],
+                    'instructions': 'Use a new experiment ID and clean starter/context for each variant; preserve frozen task/criteria, model/tools and policy, record real work and review, submit/evaluate then compare. See docs/operations.md.'}}
             write(self.folder(identifier) / 'report.json', result)
             return result

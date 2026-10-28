@@ -1,0 +1,15 @@
+--- a/README.md
++++ b/README.md
+@@ -37,6 +37,12 @@
+ The v0.2 ledger conservatively invalidates all receipts when any candidate source changes, rather than guessing affected scope. Repeat required goal/code checks for the new candidate and update capability observations; unchanged candidates can be reassessed without rerunning tools. Runtime inability must be recorded as unavailable, never hidden by a historical observation. Final acceptance requires both a valid ledger and a genuinely independent operational verdict; JSON identity strings do not authenticate agents.
+ 
+ Deliver only checked, independently accepted work, following project publication authorization. Report scope, evidence, exclusions, limitations and revision. Never force-publish or commit incomplete work to satisfy cadence. Routine screenshots/logs/transcripts go into ignored scratch space; Git preserves completed history. Keep current requirements and open defects discoverable, not a permanent report per task.
++
++## Experimental negative-case preparation
++
++During criteria preparation, write a concise project-specific negative-case matrix for the applicable frozen requirements. Include relevant invalid types and values, boundary values, missing resources or unknown entry points, and the guarantee that rejected or failed writes do not mutate valid state. Each applicable row identifies the requirement, expected observable result, and planned check; mark irrelevant classes with a reason. The matrix maps the existing acceptance bar and does not add or weaken product requirements.
++
++The independent reviewer challenges matrix coverage during the existing design challenge before implementation. Before the final review handoff, the lead executes a concrete check for each applicable class and preserves its actual command/action and observed result. These preparation and handoff artifacts do not replace independent behavior checks, exact-source review, fresh evidence or any acceptance gate. Treat this as an experimental practice until matched trials show useful evidence; unchanged ownership and workflow transitions still apply.
+ 
+ ## Project artifact policy
+ 

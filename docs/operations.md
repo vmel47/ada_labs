@@ -61,6 +61,12 @@ Record each implementation correction, including before the first submission, wi
 
 `finish ID --session SEGMENT_ID --receipt FILE` closes a registered segment. The receipt needs observed `status` (`completed`, `failed`, `interrupted`) and `source_ref`. Optional nonnegative measurements are `input_tokens`, `output_tokens`, `cached_input_tokens`, `model_calls`, `monetary_cost`, `wall_seconds`; omitted values remain null. Do not estimate unavailable provider usage or invent cost from subscription limits. Closed accounting cannot be silently rewritten.
 
+For prospective development measurements, add `--timed --stage planning` (or `implementation`, `correction`, `design-review`, `final-review`) to `begin` before dispatching the work. Finish that segment immediately at stage completion, omit `wall_seconds`, and let the controller measure the monotonic interval. Use separate lead and reviewer segments; do not leave a lead segment open while waiting for review and then call its whole interval development time. Unknown token/call/cost fields remain null. Timed segments cannot override their clock result. An uncertain clock leaves duration unknown; interrupted work retains its observed duration when continuity is verified. Do not reconstruct the previous pilot's missing measurements.
+
+Self-check corrections can also be registered with `correction`: set `origin` to `self-check` and include `failure` with the actual nonzero `returncode`, `argv`, and previous `subject_digest`, plus the normal before/after and source/finding references. Expected initial failures in a deliberately unimplemented contract are not corrective defects. Both self-check and independent-finding corrective revisions remain visible.
+
+Comparison v2 is frozen before new work. It reports each measured direction/delta separately, including equal quality with different time or correction counts; missing metrics remain unknown. Its one-second-or-two-percent timing tie band is a predefined reporting rule, not proof of statistical significance. Historical v1 records and prior conclusions remain retained.
+
 ```powershell
 python start.py pause ID
 python start.py resume ID

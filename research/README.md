@@ -10,3 +10,7 @@ The candidate adds a project-independent executable-contract preparation step to
 - [Reviewed candidate patch](contract-preparation.patch)
 
 The production ADA checkout remains unchanged. Keep the patch experimental and repeat under matched conditions with counterbalanced order and independent task contexts before considering promotion. The pilot's raw application artifacts, review receipts, failed observations and screenshots remain in local ignored history; no transcript or credential is published here.
+
+## New measured trial
+
+[Study 002: Repair Queue v1](study-002.md) preserves the first pilot and develops two new applications in separate fresh Lead contexts. It fixes equal-quality comparison, records actual development/correction/review intervals, and evaluates a different small ADA change: a negative-case preparation matrix. Both final applications pass. The candidate incurred two late validation findings versus zero in stable; its primary hypothesis was not supported. [Sanitized measurements](study-002.json) and the [reviewed patch](negative-case-preparation.patch) accompany the full repetition instructions.

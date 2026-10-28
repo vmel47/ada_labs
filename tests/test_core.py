@@ -11,7 +11,7 @@ from unittest.mock import patch
 from http.client import HTTPConnection
 
 from ada_lab.files import ROOT, copy_tree, digest, lock, read, tree_digest, write
-from ada_lab.lab import Lab
+from ada_lab.lab import Lab, COMPARISON_POLICY
 
 
 def review(subject, observer='independent-test-fixture', status='PASS'):
@@ -185,6 +185,88 @@ class CoreTests(unittest.TestCase):
         for values in ({'input_tokens':1.5},{'wall_seconds':float('nan')},{'monetary_cost':float('inf')}):
             with self.assertRaises(ValueError):
                 self.lab.finish(identifier,session['id'],{'status':'completed','source_ref':'unit fixture',**values})
+
+    def test_controller_timing_is_prospective_and_separate_by_role(self):
+        identifier=self.prepare()
+        lead=self.lab.begin(identifier,'lead','lead','stable',source_ref='unit fixture',timed=True,stage='implementation')
+        self.lab.finish(identifier,lead['id'],{'status':'completed','source_ref':'unit fixture'})
+        values=self.lab.measurements(self.lab.load(identifier),'stable')
+        self.assertGreaterEqual(values['development_wall_seconds'],0)
+        self.assertIsNone(values['review_wall_seconds'])
+        self.assertTrue(self.lab.load(identifier)['sessions'][0]['timer']['continuity_verified'])
+        timed=self.lab.begin(identifier,'reviewer','reviewer','stable',source_ref='unit fixture',timed=True)
+        with self.assertRaises(ValueError):
+            self.lab.finish(identifier,timed['id'],{'status':'completed','source_ref':'unit fixture','wall_seconds':3})
+
+    def test_clock_discontinuity_stays_unknown(self):
+        identifier=self.prepare()
+        segment=self.lab.begin(identifier,'lead','lead','stable',source_ref='unit fixture',timed=True)
+        with patch('ada_lab.lab.time.monotonic_ns',return_value=1):
+            self.lab.finish(identifier,segment['id'],{'status':'completed','source_ref':'unit fixture'})
+        self.assertIsNone(self.lab.load(identifier)['sessions'][0]['wall_seconds'])
+
+    def comparison_fixture(self):
+        identifier=self.prepare();record=self.lab.load(identifier)
+        artifact=Path(self.temp.name)/'efficiency-fixture';artifact.mkdir();(artifact/'app.py').write_text('unit fixture')
+        record['sessions']=[]
+        for variant,seconds,corrections in [('stable',120,1),('candidate',60,0)]:
+            evaluation={'artifact_digest':tree_digest(artifact),'quality_pass':True,'browser_version':'same',
+                        'criteria':{'ui':{'status':'PASS'}},**{key:record[key] for key in ('benchmark_revision','criteria_digest','evaluator_version')}}
+            record['runs'][variant]={'artifact':str(artifact),'artifact_digest':tree_digest(artifact),'evaluation':evaluation,
+                                     'corrections':[{'synthetic':True}]*corrections,'autonomy':{'human_interventions':0}}
+            record['sessions'].append({'id':variant,'observer':'unit fixture','role':'lead','variant':variant,
+                'model':record['model'],'status':'completed','wall_seconds':seconds,'input_tokens':None,
+                'output_tokens':None,'cached_input_tokens':None,'model_calls':None,'monetary_cost':None})
+        return identifier,record
+
+    def test_equal_quality_compare_uses_observed_dimensions(self):
+        identifier,record=self.comparison_fixture();self.lab.save(record)
+        result=self.lab.compare(identifier)
+        self.assertEqual(result['outcome'],'Improvement observed')
+        self.assertEqual(result['metric_comparisons']['development_wall_seconds']['delta'],-60)
+
+    def test_active_work_blocks_final_completion(self):
+        identifier,record=self.comparison_fixture();record['sessions'][0]['status']='active';self.lab.save(record)
+        self.assertEqual(self.lab.compare(identifier)['outcome'],'Inconclusive result')
+        self.assertNotEqual(self.lab.load(identifier)['status'],'completed')
+
+    def test_changed_conclusion_is_archived_and_legacy_policy_retained(self):
+        identifier,record=self.comparison_fixture();record.pop('comparison_policy')
+        record['comparison']={'outcome':'Earlier synthetic fixture'};self.lab.save(record)
+        result=self.lab.compare(identifier)
+        self.assertEqual(result['outcome'],'No demonstrated advantage')
+        saved=self.lab.load(identifier)
+        self.assertEqual(saved['comparison_history'][0]['comparison']['outcome'],'Earlier synthetic fixture')
+        self.lab.compare(identifier)
+        self.assertEqual(len(self.lab.load(identifier)['comparison_history']),1)
+
+
+class EfficiencyTests(unittest.TestCase):
+    def values(self,development=None,review_time=None,corrections=None):
+        return {'development_wall_seconds':development,'review_wall_seconds':review_time,'correction_attempts':corrections,
+                'autonomy':{},'autonomy_scope':'variant'}
+
+    def test_equal_quality_measured_time_advantage_not_vetoed_by_unknown_tokens(self):
+        outcome,metrics=Lab.efficiency_comparison(self.values(120,10,1),self.values(60,10,0),COMPARISON_POLICY)
+        self.assertEqual(outcome,'Improvement observed')
+        self.assertEqual(metrics['development_wall_seconds']['percent'],-50)
+        self.assertEqual(metrics['input_tokens']['direction'],'unknown')
+
+    def test_adverse_and_mixed_directions(self):
+        outcome,_=Lab.efficiency_comparison(self.values(60,10,0),self.values(120,10,1),COMPARISON_POLICY)
+        self.assertEqual(outcome,'Regression observed')
+        outcome,_=Lab.efficiency_comparison(self.values(120,10,1),self.values(60,30,0),COMPARISON_POLICY)
+        self.assertEqual(outcome,'Trade-off observed')
+
+    def test_ties_and_no_evidence(self):
+        outcome,_=Lab.efficiency_comparison(self.values(100,10,0),self.values(101,10,0),COMPARISON_POLICY)
+        self.assertEqual(outcome,'No demonstrated advantage')
+        outcome,_=Lab.efficiency_comparison(self.values(),self.values(),COMPARISON_POLICY)
+        self.assertEqual(outcome,'Inconclusive result')
+
+    def test_zero_baseline_has_no_invented_percentage(self):
+        _,metrics=Lab.efficiency_comparison(self.values(corrections=0),self.values(corrections=1),COMPARISON_POLICY)
+        self.assertIsNone(metrics['correction_attempts']['percent'])
 
 
 class WrapperIntegrationTests(unittest.TestCase):

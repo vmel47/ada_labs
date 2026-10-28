@@ -50,3 +50,5 @@ python start.py calibrate
 No automatic promotion modifies production ADA. A successful candidate is delivered as a patch and an evidence-based recommendation.
 
 The [first pilot](research/README.md) completed both real application runs. Both met mandatory quality; one pair does not demonstrate an efficiency advantage.
+
+The [measured Repair Queue trial](research/study-002.md) completed two new independently developed applications, actual corrections and repeatable native evaluation. Both final applications passed; the negative-case-matrix candidate had two late validation findings versus zero in stable. Its primary hypothesis was not supported. The report includes measured stage durations, comparison limitations and exact repetition instructions.

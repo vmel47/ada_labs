@@ -28,6 +28,7 @@ def main():
         if name == 'begin':
             sub.add_argument('--observer', required=True); sub.add_argument('--role', choices=['lead', 'reviewer', 'research'], required=True)
             sub.add_argument('--variant', choices=['stable', 'candidate', 'single']); sub.add_argument('--model'); sub.add_argument('--source-ref', required=True)
+            sub.add_argument('--timed', action='store_true'); sub.add_argument('--stage')
         if name == 'finish': sub.add_argument('--session', required=True); sub.add_argument('--receipt', required=True)
         if name == 'review': sub.add_argument('--phase', choices=['design', 'behavior', 'code'], required=True); sub.add_argument('--receipt', required=True)
         if name == 'correction': sub.add_argument('--receipt', required=True)
@@ -57,7 +58,7 @@ def main():
         elif name == 'research': result = lab.research(args.id)
         elif name == 'run': result = lab.run(args.id, args.variant)
         elif name == 'candidate': result = lab.freeze_candidate(args.id, read(args.review), args.intervention)
-        elif name == 'begin': result = lab.begin(args.id, args.observer, args.role, args.variant, args.model, args.source_ref)
+        elif name == 'begin': result = lab.begin(args.id, args.observer, args.role, args.variant, args.model, args.source_ref, args.timed, args.stage)
         elif name == 'finish': result = lab.finish(args.id, args.session, read(args.receipt))
         elif name == 'review': result = lab.add_review(args.id, args.variant, args.phase, read(args.receipt))
         elif name == 'correction': result = lab.correction(args.id, args.variant, read(args.receipt))

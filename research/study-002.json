@@ -1,0 +1,438 @@
+{
+  "kind": "sanitized-matched-trial-evidence",
+  "experiment": "exp-7ee8f26bb6f9",
+  "started": "2026-10-28T09:30:58.148244+00:00",
+  "finished": "2026-10-28T10:24:36.331682+00:00",
+  "hypothesis": "An explicit negative-case matrix during criteria preparation reduces late validation and routing defects without relaxing quality.",
+  "analysis": {
+    "hypothesis_result": "Not supported in this pair: stable had zero late validation/routing findings; candidate had two validation findings despite its preimplementation negative-case matrix. Both findings were corrected and independently reverified. This does not establish that the practice causes regressions in general.",
+    "primary_late_findings": {
+      "stable": 0,
+      "candidate": 2
+    },
+    "primary_related_corrective_revisions": {
+      "stable": 0,
+      "candidate": 1
+    },
+    "final_quality": "Both complete applications independently pass all ten mandatory API/browser criteria, eleven additional API groups, five additional UI scenarios, original five JSON edges and fourteen expanded POST/PUT JSON/Unicode checks.",
+    "correction_classification": {
+      "stable": "One self-check source revision fixed a test-owned SQLite connection cleanup failure; no independently found application defect.",
+      "candidate": "One self-check revision fixed an application SQLite connection leak; one independent-finding revision fixed strict-JSON and invalid-Unicode validation. Total two source correction revisions; two late findings closed in one revision.",
+      "candidate_other_retries": "Separate search-fixture expectation, browser-save wait, UUID scratch collision and initial selected-vs-whole-digest registration rejection were retained. They are not additional application-source correction revisions.",
+      "reviewer_other_retries": "One stable supplementary UI route-glob correction; one retrospective provenance newline-normalization probe; restricted trusted-wrapper socket attempt repeated with proper capability. These are not application defects."
+    },
+    "time_scope": "Prospective monotonic dispatch-to-completion stage intervals including tool/controller overhead; lead sums include actual correction stages. Review times include asymmetric suite setup and symmetric follow-up testing performed during candidate review. They are not inference-only, matched causal review times, or additive lifecycle time.",
+    "baseline_environment_retries": "Four recorded environment retries retained in lead implementation interval; not subtracted retrospectively. Canonical-only trusted ADA regression was separately verified without generated app host execution.",
+    "telemetry": "Provider tokens, calls, provider session totals and cost unavailable; null, not estimated. Human interventions, clarifications, manual recoveries and user-delegated testing are zero in each recorded run.",
+    "historical_provenance_limitation": "Candidate first self-check whole-source before digest was reconstructed retrospectively. Independent selected-set reconstruction now matches the contemporaneous aggregate selected-file digest, but no contemporaneous full per-file manifest existed; do not label the full before digest prospective. Final independently reviewed source and independent-finding correction are freshly bound.",
+    "limitations": [
+      "One stable-first pair, different fresh Leads, same inherited model/tools, public known tests, reused Reviewer and prose negative-case overlap in stable preparation limit causal inference.",
+      "Candidate planning includes controller pre-dispatch context overhead; baseline includes additional environment setup. No durations were retrospectively subtracted.",
+      "Supplementary UI and follow-up JSON case selection chronology is disclosed in protocol_deviations; same cases applied to both.",
+      "Only this Windows/native runtime combination is demonstrated; no untested-platform claim.",
+      "Ignored local artifacts survive process restarts but need protected backup; sanitized remote source is not a backup of raw runs."
+    ],
+    "production_ada": "Unchanged; candidate remains experimental and is not promoted.",
+    "protocol_deviations": [
+      {
+        "scope": "supplement selection",
+        "observation": "Eleven supplementary API groups frozen before source inspection. Five additional UI scenarios selected after stable exact-source review to close local coverage, then identical final suite applied to both. Mandatory ten benchmark criteria unchanged.",
+        "evidence": "reviewer-supplement-manifest.json and reviewer-ui-supplement-manifest.json"
+      },
+      {
+        "scope": "timing",
+        "observation": "Candidate planning timer includes controller pre-dispatch context/handoff overhead. Stable implementation includes documented environment setup retries. Neither duration is inference-only, and no time is retrospectively subtracted."
+      },
+      {
+        "scope": "additional validation coverage",
+        "observation": "Five JSON/Unicode edge cases selected after candidate source review were run identically on both: stable passed five, initial candidate failed five, representing two distinct validation findings. After correction, the original five were replayed and a fourteen-case POST/PUT expansion was frozen before corrected source inspection and passed both. Mandatory ten benchmark criteria unchanged."
+      }
+    ],
+    "current_blockers": []
+  },
+  "stable_revision": "f65d8bd1cae4f19ee90336097dacf6eb33b4b512",
+  "candidate_digest": "d97757ec38e55cf01701d206711af63dd5aece6f5c1029e313eded4d45d48eb6",
+  "patch_digest": "21c4926bf9f59cb42d3bbc93dee138beb960305490d29798a4812725612972d1",
+  "patch_file_sha256": "3a727d29193c4b41ead877c9ab15a60edd6d41430a45656c86d84ad3a1373ca4",
+  "benchmark": "repair-queue-v1",
+  "benchmark_revision": "d713cb5e7dd1c30dec30e9499f3421bcfaabe54e1238e705952618c5792f8152",
+  "criteria_digest": "a8f2876655c9c2b16b05611c3d76f33534e56522708232452c7db82f28f93021",
+  "evaluator_version": "61683fe52f6394966f2c1df740795f70a5da7713ac7dcf8561fb066d84c688d9",
+  "model": "gpt-6.1-sol",
+  "environment": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.14.7",
+    "transport": "native-stdio-v1"
+  },
+  "limits": {
+    "max_sessions": 20
+  },
+  "comparison_policy": {
+    "version": 2,
+    "seconds_absolute_tolerance": 1.0,
+    "seconds_relative_tolerance": 0.02,
+    "scope": "Observed directions only; one pair does not establish reliability"
+  },
+  "comparison_source_digest": "fe0fa570514aedbc5cefd62b03d20ff90b9a7482913bffee8e18024f25106fab",
+  "outcome": "Trade-off observed",
+  "metric_comparisons": {
+    "development_wall_seconds": {
+      "baseline": 559.6691478,
+      "candidate": 680.6565051,
+      "delta": 120.98735729999999,
+      "percent": 21.617657106093564,
+      "direction": "regressed",
+      "lower_is_better": true,
+      "tolerance": 11.193382956
+    },
+    "review_wall_seconds": {
+      "baseline": 959.4339519,
+      "candidate": 428.0664663,
+      "delta": -531.3674856,
+      "percent": -55.38343567555794,
+      "direction": "improved",
+      "lower_is_better": true,
+      "tolerance": 19.188679038
+    },
+    "correction_attempts": {
+      "baseline": 1,
+      "candidate": 2,
+      "delta": 1,
+      "percent": 100.0,
+      "direction": "regressed",
+      "lower_is_better": true,
+      "tolerance": 0
+    },
+    "input_tokens": {
+      "baseline": null,
+      "candidate": null,
+      "delta": null,
+      "percent": null,
+      "direction": "unknown",
+      "lower_is_better": true,
+      "tolerance": null
+    },
+    "output_tokens": {
+      "baseline": null,
+      "candidate": null,
+      "delta": null,
+      "percent": null,
+      "direction": "unknown",
+      "lower_is_better": true,
+      "tolerance": null
+    },
+    "model_calls": {
+      "baseline": null,
+      "candidate": null,
+      "delta": null,
+      "percent": null,
+      "direction": "unknown",
+      "lower_is_better": true,
+      "tolerance": null
+    },
+    "monetary_cost": {
+      "baseline": null,
+      "candidate": null,
+      "delta": null,
+      "percent": null,
+      "direction": "unknown",
+      "lower_is_better": true,
+      "tolerance": null
+    },
+    "human_interventions": {
+      "baseline": 0,
+      "candidate": 0,
+      "delta": 0,
+      "percent": null,
+      "direction": "equal",
+      "lower_is_better": true,
+      "tolerance": 0
+    },
+    "clarifications": {
+      "baseline": 0,
+      "candidate": 0,
+      "delta": 0,
+      "percent": null,
+      "direction": "equal",
+      "lower_is_better": true,
+      "tolerance": 0
+    },
+    "manual_recoveries": {
+      "baseline": 0,
+      "candidate": 0,
+      "delta": 0,
+      "percent": null,
+      "direction": "equal",
+      "lower_is_better": true,
+      "tolerance": 0
+    },
+    "testing_delegated_to_user": {
+      "baseline": 0,
+      "candidate": 0,
+      "delta": 0,
+      "percent": null,
+      "direction": "equal",
+      "lower_is_better": true,
+      "tolerance": 0
+    }
+  },
+  "protocol_deviations": [
+    {
+      "scope": "supplement selection",
+      "observation": "Eleven supplementary API groups frozen before source inspection. Five additional UI scenarios selected after stable exact-source review to close local coverage, then identical final suite applied to both. Mandatory ten benchmark criteria unchanged.",
+      "evidence": "reviewer-supplement-manifest.json and reviewer-ui-supplement-manifest.json"
+    },
+    {
+      "scope": "timing",
+      "observation": "Candidate planning timer includes controller pre-dispatch context/handoff overhead. Stable implementation includes documented environment setup retries. Neither duration is inference-only, and no time is retrospectively subtracted."
+    },
+    {
+      "scope": "additional validation coverage",
+      "observation": "Five JSON/Unicode edge cases selected after candidate source review were run identically on both: stable passed five, initial candidate failed five, representing two distinct validation findings. After correction, the original five were replayed and a fourteen-case POST/PUT expansion was frozen before corrected source inspection and passed both. Mandatory ten benchmark criteria unchanged."
+    }
+  ],
+  "runs": {
+    "stable": {
+      "artifact_digest": "1b9e11e54a1fd4657f9a62233b798909a5f0f6c09987e2adf0421dd07b2a8f9b",
+      "application_source_hashes": {
+        "app.js": "d8763e7ca744289fbd6a949a107598363f119cdba7818a8df2c3818eb0012d53",
+        "app.py": "a10deb5715429a154d9ca885ea69f65e61ca321ea39b1f523f2a9da40f21856b",
+        "index.html": "57f950e18f7a330bf0e5472691c3d4102c004f9c003ccd222bea123522d46c8a",
+        "style.css": "5eb8f08331743fe66f065732f46c573fb4178b03b030fb8ac4432ff3b9d6c16a"
+      },
+      "quality_pass": true,
+      "criteria": {
+        "api_crud": "PASS",
+        "validation": "PASS",
+        "search_filter": "PASS",
+        "persistence": "PASS",
+        "ui_crud": "PASS",
+        "ui_filter": "PASS",
+        "ui_error": "PASS",
+        "responsive": "PASS",
+        "ui_states": "PASS",
+        "ui_validation": "PASS"
+      },
+      "reviews": {
+        "design": "PASS",
+        "behavior": "PASS",
+        "code": "PASS"
+      },
+      "actual_execution_environment": {
+        "browser": "156.0.8078.48",
+        "python": "3.14.7 (tags/v3.14.7:823f032, Aug  5 2026, 10:51:32) [MSC v.1944 64 bit (AMD64)]",
+        "sandbox": "codex-cli 0.165.0-alpha.1.2",
+        "backend": "windows-mxc"
+      },
+      "development_wall_seconds": 559.6691478,
+      "review_wall_seconds": 959.4339519,
+      "work_segments": [
+        {
+          "role": "lead",
+          "stage": "planning",
+          "status": "completed",
+          "wall_seconds": 171.9120199
+        },
+        {
+          "role": "reviewer",
+          "stage": "design-review",
+          "status": "completed",
+          "wall_seconds": 81.7517071
+        },
+        {
+          "role": "lead",
+          "stage": "implementation",
+          "status": "completed",
+          "wall_seconds": 387.7571279
+        },
+        {
+          "role": "reviewer",
+          "stage": "final-review",
+          "status": "completed",
+          "wall_seconds": 877.6822448
+        }
+      ],
+      "correction_attempts": 1,
+      "self_check_corrections": 1,
+      "provider_resources": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cached_input_tokens": null,
+        "model_calls": null,
+        "monetary_cost": null,
+        "agent_sessions": null
+      },
+      "independent_finding_ids": [],
+      "independent_fail_receipts": 0,
+      "autonomy": {
+        "human_interventions": 0,
+        "clarifications": 0,
+        "manual_recoveries": 0,
+        "testing_delegated_to_user": 0
+      },
+      "environment_retry_count": 4,
+      "formal_evaluation_wall_seconds": 7.186757700000271,
+      "supplementary_api": {
+        "passed": 11,
+        "failed": 0
+      },
+      "supplementary_ui_status": "PASS",
+      "json_original_final_status": "PASS",
+      "json_expanded_final_status": "PASS",
+      "json_expanded_cases": 14,
+      "trusted_ada_regression": "PASS"
+    },
+    "candidate": {
+      "artifact_digest": "17031a9e91217b9e69d9e034e9c90c65aa3815874820c542da2a1aa776725d2d",
+      "application_source_hashes": {
+        "app.js": "5959c987918a9c34bee80677ae5e1941c041ff239500be2d690468b660f315b5",
+        "app.py": "1bd37f3e8f8febd097f83e9a69a9c41fe440ea8ffc23aab288d328cc2c8e33a7",
+        "index.html": "d89f12cdc5f638728d08c0fbad54d8aa169b046707c2b5714bbe941986a1a015",
+        "style.css": "fb9c4cc2ed810cdd8fc5cfee96261aedae441f5f47ea9126cef0ff202af236a6"
+      },
+      "quality_pass": true,
+      "criteria": {
+        "api_crud": "PASS",
+        "validation": "PASS",
+        "search_filter": "PASS",
+        "persistence": "PASS",
+        "ui_crud": "PASS",
+        "ui_filter": "PASS",
+        "ui_error": "PASS",
+        "responsive": "PASS",
+        "ui_states": "PASS",
+        "ui_validation": "PASS"
+      },
+      "reviews": {
+        "design": "PASS",
+        "behavior": "PASS",
+        "code": "PASS"
+      },
+      "actual_execution_environment": {
+        "browser": "156.0.8078.48",
+        "python": "3.14.7 (tags/v3.14.7:823f032, Aug  5 2026, 10:51:32) [MSC v.1944 64 bit (AMD64)]",
+        "sandbox": "codex-cli 0.165.0-alpha.1.2",
+        "backend": "windows-mxc"
+      },
+      "development_wall_seconds": 680.6565051,
+      "review_wall_seconds": 428.0664663,
+      "work_segments": [
+        {
+          "role": "lead",
+          "stage": "planning",
+          "status": "completed",
+          "wall_seconds": 260.2081635
+        },
+        {
+          "role": "reviewer",
+          "stage": "design-review",
+          "status": "completed",
+          "wall_seconds": 57.313823
+        },
+        {
+          "role": "lead",
+          "stage": "implementation",
+          "status": "completed",
+          "wall_seconds": 316.8267781
+        },
+        {
+          "role": "reviewer",
+          "stage": "final-review",
+          "status": "completed",
+          "wall_seconds": 205.0049289
+        },
+        {
+          "role": "lead",
+          "stage": "correction",
+          "status": "completed",
+          "wall_seconds": 103.6215635
+        },
+        {
+          "role": "reviewer",
+          "stage": "correction-review",
+          "status": "completed",
+          "wall_seconds": 165.7477144
+        }
+      ],
+      "correction_attempts": 2,
+      "self_check_corrections": 1,
+      "provider_resources": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cached_input_tokens": null,
+        "model_calls": null,
+        "monetary_cost": null,
+        "agent_sessions": null
+      },
+      "independent_finding_ids": [
+        "candidate-invalid-unicode",
+        "candidate-nonstandard-json-constants"
+      ],
+      "independent_fail_receipts": 2,
+      "autonomy": {
+        "human_interventions": 0,
+        "clarifications": 0,
+        "manual_recoveries": 0,
+        "testing_delegated_to_user": 0
+      },
+      "environment_retry_count": 0,
+      "formal_evaluation_wall_seconds": 7.336513600000217,
+      "supplementary_api": {
+        "passed": 11,
+        "failed": 0
+      },
+      "supplementary_ui_status": "PASS",
+      "json_original_final_status": "PASS",
+      "json_expanded_final_status": "PASS",
+      "json_expanded_cases": 14,
+      "trusted_ada_regression": "PASS"
+    }
+  },
+  "non_application_work_segments": [
+    {
+      "role": "research",
+      "stage": "candidate-development",
+      "wall_seconds": 156.1820149,
+      "status": "completed"
+    },
+    {
+      "role": "reviewer",
+      "stage": "candidate-validation",
+      "wall_seconds": 52.2619123,
+      "status": "completed"
+    },
+    {
+      "role": "research",
+      "stage": "lab-source-review",
+      "wall_seconds": 144.5134716,
+      "status": "completed"
+    }
+  ],
+  "supplementary_api_suite": {
+    "suite": "reviewer-supplement-v1.py",
+    "sha256": "318d44e5d8030b77228c7ecab00fb813325f78447b9abb5d5530870b0a06b459",
+    "frozen_at": "2026-10-28T09:51:11.129589+00:00",
+    "scope": "Selected from TASK before reading either new app implementation; same suite will run on stable and candidate; public ten criteria unchanged",
+    "groups": 11
+  },
+  "supplementary_ui_suite": {
+    "sha256": "c7d5702181b16dded286ea22932d0a70b75b785674f945035ac6113a54e37539",
+    "scenarios": 5,
+    "selection": "Added after stable source review; identical final script applied to both"
+  },
+  "expanded_json_suite": {
+    "observed_at": "2026-10-28T10:21:57.013954+00:00",
+    "sha256": "868f7e5ec7c47865b9155eccbf20618fa84a048071b79d6623ee72c6f75bd854",
+    "scope": "Frozen before corrected candidate source read; expansion follows two confirmed original findings; same14 cases both variants, preserved original5 replay; no benchmark edits"
+  },
+  "unknown_metrics": [
+    "provider_session_totals",
+    "input_tokens",
+    "output_tokens",
+    "cached_input_tokens",
+    "model_calls",
+    "monetary_cost"
+  ],
+  "raw_storage": ".lab/experiments/exp-7ee8f26bb6f9/ and .lab/evaluations/; ignored, local, not a remote backup",
+  "production_promotion": false
+}
